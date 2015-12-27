@@ -5,7 +5,7 @@ A custom monitor for use with [Redux DevTools](https://github.com/gaearon/redux-
 ### Installation
 
 ```
-npm install --save-dev redux-remote-monitor
+npm install --save-dev remote-redux-devtools
 ```
 
 ### Usage
@@ -17,7 +17,7 @@ You can use `LogMonitor` as the only monitor in your app:
 ```js
 import React from 'react';
 import { createDevTools } from 'redux-devtools';
-import RemoteMonitor from 'redux-remote-monitor';
+import RemoteMonitor from 'remote-redux-devtools';
 
 export default createDevTools(
   <RemoteMonitor />

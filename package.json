@@ -1,7 +1,7 @@
 {
-  "name": "redux-remote-monitor",
+  "name": "remote-redux-devtools",
   "version": "0.0.1",
-  "description": "A custom monitor for Redux DevTools to relay Redux actions.",
+  "description": "Relay Redux actions to remote Redux DevTools.",
   "main": "lib/RemoteMonitor.js",
   "files": ["lib"],
   "scripts": {
@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/zalmoxisus/redux-remote-monitor.git"
+    "url": "https://github.com/zalmoxisus/remote-redux-devtools.git"
   },
   "keywords": [
     "redux",
@@ -28,9 +28,9 @@
   "author": "Mihail Diordiev <zalmoxisus@gmail.com> (https://github.com/zalmoxisus)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/zalmoxisus/redux-remote-monitor/issues"
+    "url": "https://github.com/zalmoxisus/remote-redux-devtools/issues"
   },
-  "homepage": "https://github.com/zalmoxisus/redux-remote-monitor",
+  "homepage": "https://github.com/zalmoxisus/remote-redux-devtools",
   "devDependencies": {
     "babel-cli": "^6.3.15",
     "babel-core": "^6.1.20",
