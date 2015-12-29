@@ -2,8 +2,10 @@
   "name": "remote-redux-devtools",
   "version": "0.0.1",
   "description": "Relay Redux actions to remote Redux DevTools.",
-  "main": "lib/RemoteMonitor.js",
-  "files": ["lib"],
+  "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "clean": "rimraf lib",
     "build": "babel src --out-dir lib",
@@ -48,8 +50,9 @@
     "rimraf": "^2.3.4",
     "webpack": "^1.11.0"
   },
-  "peerDependencies": {
-    "react": "^0.14.0",
-    "redux-devtools": "^3.0.0"
+  "dependencies": {
+    "react": "^0.14.3",
+    "redux": "^3.0.5",
+    "redux-devtools": "^3.0.1"
   }
 }
