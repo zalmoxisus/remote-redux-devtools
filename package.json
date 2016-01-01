@@ -51,7 +51,6 @@
     "webpack": "^1.11.0"
   },
   "dependencies": {
-    "react": "^0.14.3",
     "redux": "^3.0.5",
     "redux-devtools": "^3.0.1"
   }
