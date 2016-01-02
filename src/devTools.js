@@ -1,7 +1,19 @@
+import socketCluster from 'socketcluster-client';
 import configureStore from './configureStore';
+const socketOptions = {
+  protocol: 'http',
+  hostname: 'remotedev.io',
+  port: 80,
+  autoReconnect: true
+};
+let socket;
 let store = {};
 let shouldInit = true;
 let actionsCount = 0;
+
+function init() {
+  socket = socketCluster.connect(socketOptions);
+}
 
 function relay(type, state, action, nextActionId) {
   const message = {
@@ -13,6 +25,7 @@ function relay(type, state, action, nextActionId) {
   };
   if (shouldInit) shouldInit = false;
 
+  socket.emit('log', message);
   console.log('message', message);
 }
 
@@ -35,6 +48,7 @@ function subscriber(state = {}, action) {
 export default function devTools() {
   return (next) => {
     return (reducer, initialState) => {
+      init();
       store = configureStore(next, subscriber)(reducer, initialState);
       return store;
     };
