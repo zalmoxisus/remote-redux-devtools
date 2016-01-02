@@ -10,6 +10,7 @@ let socket;
 let store = {};
 let shouldInit = true;
 let actionsCount = 0;
+let lastTime = 0;
 
 function init() {
   socket = socketCluster.connect(socketOptions);
@@ -33,10 +34,12 @@ function subscriber(state = {}, action) {
   if (action && action.type) {
     setTimeout(() => {
       if (action.type === 'PERFORM_ACTION') {
+        if (lastTime > action.timestamp) return state;
         actionsCount++;
         relay('ACTION', store.getState(), action, actionsCount);
       } else {
         const liftedState = store.liftedStore.getState();
+        lastTime = Date.now();
         relay('STATE', liftedState);
         actionsCount = liftedState.nextActionId;
       }
