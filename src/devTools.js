@@ -1,3 +1,4 @@
+import { stringify } from 'jsan';
 import socketCluster from 'socketcluster-client';
 import configureStore from './configureStore';
 const socketOptions = {
@@ -15,8 +16,8 @@ let lastTime = 0;
 
 function relay(type, state, action, nextActionId) {
   const message = {
-    payload: state,
-    action: action || '',
+    payload: state ? stringify(state) : '',
+    action: action ? stringify(action) : '',
     nextActionId: nextActionId || '',
     type: type,
     init: shouldInit
