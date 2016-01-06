@@ -1,6 +1,9 @@
-A custom monitor for use with [Redux DevTools](https://github.com/gaearon/redux-devtools).
+Remote Redux DevTools
+=====================
 
-**In early development stage yet.**
+![Demo](demo.gif)
+
+Use [Redux DevTools](https://github.com/gaearon/redux-devtools) remotely for React Native, hybrid, desktop and server side Redux apps.
 
 ### Installation
 
@@ -10,19 +13,40 @@ npm install --save-dev remote-redux-devtools
 
 ### Usage
 
-You can use `LogMonitor` as the only monitor in your app:
+Just [add our store enhancer to your store](https://github.com/zalmoxisus/remote-redux-devtools/commit/eb18fc49e1f083a2330939af52da349b862f8df1):
 
 ##### `containers/DevTools.js`
 
 ```js
-import React from 'react';
-import { createDevTools } from 'redux-devtools';
-import RemoteMonitor from 'remote-redux-devtools';
+import { createStore, applyMiddleware, compose } from 'redux';
+import thunk from 'redux-thunk';
+import devTools from 'remote-redux-devtools';
+import reducer from '../reducers';
 
-export default createDevTools(
-  <RemoteMonitor />
-);
+export default function configureStore(initialState) {
+  const finalCreateStore = compose(
+    applyMiddleware(thunk),
+    devTools()
+  )(createStore);
+
+  const store = finalCreateStore(reducer, initialState);
+
+  return store;
+}
 ```
+
+### Remote monitor
+
+Use one of [our remote apps](https://github.com/zalmoxisus/remotedev-app):
+- [web](http://remotedev.io/)
+- [chrome app](https://chrome.google.com/webstore/detail/remotedev/faicmgpfiaijcedapokpbdejaodbelph)(recommended)
+- [electron app](https://github.com/zalmoxisus/remote-redux-devtools/tree/master/install).
+
+### Limitations
+
+- Use it only for development, **NOT in production!**
+- The app and the monitor should be under the same external IP address.
+- For now it supports only one instance simultaneously.
 
 ### License
 
