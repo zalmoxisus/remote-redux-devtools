@@ -1,12 +1,8 @@
 import { stringify } from 'jsan';
 import socketCluster from 'socketcluster-client';
 import configureStore from './configureStore';
-const socketOptions = {
-  protocol: 'http',
-  hostname: 'remotedev.io',
-  port: 80,
-  autoReconnect: true
-};
+import { socketOptions } from './constants';
+
 let socket;
 let channel;
 let store = {};
@@ -25,23 +21,23 @@ function relay(type, state, action, nextActionId) {
   if (shouldInit) shouldInit = false;
 
   socket.emit('log', message);
-  console.log('message', message);
+}
+
+function handleMessages(message) {
+  if (message.type === 'DISPATCH') {
+    store.liftedStore.dispatch(message.action);
+  } else if (message.type === 'UPDATE') {
+    relay('STATE', store.liftedStore.getState());
+  }
 }
 
 function init() {
   socket = socketCluster.connect(socketOptions);
 
   socket.emit('login', 'master', (err, channelName) => {
-    // TODO: process errors
+    if (err) { console.error(err); return; }
     channel = socket.subscribe(channelName);
-    channel.watch(message => {
-      console.log('dispatch', message);
-      if (message.type === 'DISPATCH') {
-        store.liftedStore.dispatch(message.action);
-      } else if (message.type === 'UPDATE') {
-        relay('STATE', store.liftedStore.getState());
-      }
-    });
+    channel.watch(handleMessages);
   });
 }
 
