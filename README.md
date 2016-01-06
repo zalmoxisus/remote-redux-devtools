@@ -15,7 +15,7 @@ npm install --save-dev remote-redux-devtools
 
 Just [add our store enhancer to your store](https://github.com/zalmoxisus/remote-redux-devtools/commit/eb18fc49e1f083a2330939af52da349b862f8df1):
 
-##### `containers/DevTools.js`
+##### `store/configureStore.js`
 
 ```js
 import { createStore, applyMiddleware, compose } from 'redux';
@@ -37,10 +37,16 @@ export default function configureStore(initialState) {
 
 ### Remote monitor
 
-Use one of [our remote apps](https://github.com/zalmoxisus/remotedev-app):
+Use one of [our remote apps](https://github.com/zalmoxisus/remotedev-app) to inspect and redo actions:
 - [web](http://remotedev.io/)
-- [chrome app](https://chrome.google.com/webstore/detail/remotedev/faicmgpfiaijcedapokpbdejaodbelph)(recommended)
+- [chrome app](https://chrome.google.com/webstore/detail/remotedev/faicmgpfiaijcedapokpbdejaodbelph) (recommended)
 - [electron app](https://github.com/zalmoxisus/remote-redux-devtools/tree/master/install).
+
+Source code can be found [here](https://github.com/zalmoxisus/remotedev-app).
+
+### Examples
+- [Web](https://github.com/zalmoxisus/remote-redux-devtools/tree/master/examples)
+- [React Native](https://github.com/zalmoxisus/react-native-counter-ios-android)
 
 ### Limitations
 
