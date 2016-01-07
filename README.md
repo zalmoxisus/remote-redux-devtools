@@ -35,24 +35,25 @@ export default function configureStore(initialState) {
 }
 ```
 
-### Remote monitor
+### Remote monitoring
 
-Use one of [our remote apps](https://github.com/zalmoxisus/remotedev-app) to inspect and redo actions:
+Use one of [our monitor apps](https://github.com/zalmoxisus/remotedev-app) to inspect and redo actions:
 - [web](http://remotedev.io/)
 - [chrome app](https://chrome.google.com/webstore/detail/remotedev/faicmgpfiaijcedapokpbdejaodbelph) (recommended)
 - [electron app](https://github.com/zalmoxisus/remote-redux-devtools/tree/master/install).
 
-Source code can be found [here](https://github.com/zalmoxisus/remotedev-app).
+The source code is [here](https://github.com/zalmoxisus/remotedev-app).
 
 ### Examples
 - [Web](https://github.com/zalmoxisus/remote-redux-devtools/tree/master/examples)
-- [React Native](https://github.com/zalmoxisus/react-native-counter-ios-android)
+- [React Native](https://github.com/zalmoxisus/react-native-counter-ios-android).
 
 ### Limitations
 
 - Use it only for development, **NOT in production!**
 - The app and the monitor should be under the same external IP address.
-- For now it supports only one instance simultaneously.
+- [For now it supports only one instance simultaneously](https://github.com/zalmoxisus/remote-redux-devtools/issues/2).
+- For web apps it's easier and way faster to use [Chrome extension](https://github.com/zalmoxisus/redux-devtools-extension) instead. The remote monitoring is meant to be used for React Native, hybrid, desktop and server side apps. 
 
 ### License
 
