@@ -31,8 +31,8 @@ function handleMessages(message) {
   }
 }
 
-function init() {
-  socket = socketCluster.connect(socketOptions);
+function init(options = socketOptions) {
+  socket = socketCluster.connect(options);
 
   socket.emit('login', 'master', (err, channelName) => {
     if (err) { console.error(err); return; }
@@ -59,10 +59,10 @@ function subscriber(state = {}, action) {
   return state;
 }
 
-export default function devTools() {
+export default function devTools(options) {
   return (next) => {
     return (reducer, initialState) => {
-      init();
+      init(options);
       store = configureStore(next, subscriber)(reducer, initialState);
       return store;
     };
