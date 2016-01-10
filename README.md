@@ -44,6 +44,8 @@ Use one of [our monitor apps](https://github.com/zalmoxisus/remotedev-app) to in
 
 The source code is [here](https://github.com/zalmoxisus/remotedev-app).
 
+Also, it can be [used in React Native debugger as a dock monitor](https://github.com/jhen0409/remote-redux-devtools-on-debugger).
+
 ### Examples
 - [Web](https://github.com/zalmoxisus/remote-redux-devtools/tree/master/examples)
 - [React Native](https://github.com/zalmoxisus/react-native-counter-ios-android).
