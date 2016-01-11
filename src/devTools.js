@@ -31,8 +31,11 @@ function handleMessages(message) {
   }
 }
 
-function init(options = socketOptions) {
-  socket = socketCluster.connect(options);
+function init(options) {
+  socket = socketCluster.connect({
+    ...socketOptions,
+    ...options
+  });
 
   socket.emit('login', 'master', (err, channelName) => {
     if (err) { console.error(err); return; }
