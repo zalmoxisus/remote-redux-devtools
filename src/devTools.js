@@ -32,6 +32,8 @@ function handleMessages(message) {
 }
 
 function init(options = socketOptions) {
+  if (channel) channel.unwatch();
+  if (socket) socket.disconnect();
   socket = socketCluster.connect(options);
 
   socket.emit('login', 'master', (err, channelName) => {
