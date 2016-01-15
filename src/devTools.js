@@ -8,19 +8,21 @@ let channel;
 let store = {};
 let shouldInit = true;
 let actionsCount = 0;
-let lastTime = 0;
+let reducedState;
 
 function relay(type, state, action, nextActionId) {
-  const message = {
-    payload: state ? stringify(state) : '',
-    action: action ? stringify(action) : '',
-    nextActionId: nextActionId || '',
-    type: type,
-    init: shouldInit
-  };
-  if (shouldInit) shouldInit = false;
+  setTimeout(() => {
+    const message = {
+      payload: state ? stringify(state) : '',
+      action: action ? stringify(action) : '',
+      nextActionId: nextActionId || '',
+      type: type,
+      init: shouldInit
+    };
+    if (shouldInit) shouldInit = false;
 
-  socket.emit('log', message);
+    socket.emit('log', message);
+  }, 0);
 }
 
 function handleMessages(message) {
@@ -45,27 +47,34 @@ function init(options = socketOptions) {
 
 function subscriber(state = {}, action) {
   if (action && action.type) {
-    setTimeout(() => {
-      if (action.type === 'PERFORM_ACTION') {
-        if (lastTime > action.timestamp) return state;
-        actionsCount++;
-        relay('ACTION', store.getState(), action, actionsCount);
-      } else {
+    if (action.type === '@@redux/INIT') {
+      actionsCount = 1;
+      relay('INIT', reducedState, { timestamp: Date.now() });
+    } else if (action.type === 'PERFORM_ACTION') {
+      actionsCount++;
+      relay('ACTION', reducedState, action, actionsCount);
+    } else {
+      setTimeout(() => {
         const liftedState = store.liftedStore.getState();
-        lastTime = Date.now();
         relay('STATE', liftedState);
-        actionsCount = liftedState.nextActionId;
-      }
-    }, 0);
+      }, 0);
+    }
   }
   return state;
+}
+
+function createReducer(reducer) {
+  return (state, action) => {
+    reducedState = reducer(state, action);
+    return reducedState;
+  };
 }
 
 export default function devTools(options) {
   return (next) => {
     return (reducer, initialState) => {
       init(options);
-      store = configureStore(next, subscriber)(reducer, initialState);
+      store = configureStore(next, subscriber)(createReducer(reducer), initialState);
       return store;
     };
   };
