@@ -17,6 +17,7 @@ function relay(type, state, action, nextActionId) {
       action: action ? stringify(action) : '',
       nextActionId: nextActionId || '',
       type: type,
+      id: socket.id,
       init: shouldInit
     };
     if (shouldInit) shouldInit = false;
@@ -42,6 +43,7 @@ function init(options = socketOptions) {
     if (err) { console.error(err); return; }
     channel = socket.subscribe(channelName);
     channel.watch(handleMessages);
+    socket.on(channelName, handleMessages);
   });
 }
 
