@@ -58,7 +58,6 @@ In order to make it simple to use, by default, the module and the monitor app co
 
 - Use it only for development, **NOT in production!**
 - The app and the monitor should be under the same external IP address.
-- [For now it supports only one instance simultaneously](https://github.com/zalmoxisus/remote-redux-devtools/issues/2).
 - For web apps it's easier and way faster to use [Chrome extension](https://github.com/zalmoxisus/redux-devtools-extension) instead. The remote monitoring is meant to be used for React Native, hybrid, desktop and server side apps. 
 
 ### License
