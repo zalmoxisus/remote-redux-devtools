@@ -46,6 +46,10 @@ The source code is [here](https://github.com/zalmoxisus/remotedev-app).
 
 Also, it can be [used in React Native debugger as a dock monitor](https://github.com/jhen0409/remote-redux-devtools-on-debugger).
 
+### Communicate via local server
+
+In order to make it simple to use, by default, the module and the monitor app communicate via [remotedev.io](http://remotedev.io) server. Run it locally to make it faster and not to require an internet connection.
+
 ### Examples
 - [Web](https://github.com/zalmoxisus/remote-redux-devtools/tree/master/examples)
 - [React Native](https://github.com/zalmoxisus/react-native-counter-ios-android).
