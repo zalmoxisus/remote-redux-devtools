@@ -1,15 +1,20 @@
 module.exports.run = function(worker) {
   var scServer = worker.scServer;
+
+  scServer.addMiddleware(scServer.MIDDLEWARE_EMIT, function (socket, channel, data, next) {
+    if (channel.substr(0, 3) === 'sc-' || channel === 'respond' || channel === 'log') {
+      scServer.exchange.publish(channel, data);
+    }
+    next();
+  });
+
   scServer.on('connection', function(socket) {
     socket.on('login', function (credentials, respond) {
-      if (credentials === 'master') respond(null, 'master');
-      else respond(null, 'monitor');
-    });
-    socket.on('log', function(data) {
-      scServer.exchange.publish('monitor', data);
-    });
-    socket.on('respond', function(data) {
-      scServer.exchange.publish('master', data);
+      var channelName = credentials === 'master' ? 'respond' : 'log';
+      worker.exchange.subscribe('sc-' + socket.id).watch(function(msg) {
+        socket.emit(channelName, msg);
+      });
+      respond(null, channelName);
     });
   });
 };
