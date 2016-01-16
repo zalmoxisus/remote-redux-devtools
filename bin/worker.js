@@ -19,6 +19,7 @@ module.exports.run = function(worker) {
     socket.on('disconnect', function() {
       var channel = worker.exchange.channel('sc-' + socket.id);
       channel.unsubscribe(); channel.destroy();
+      scServer.exchange.publish('log', { id: socket.id, type: 'DISCONNECTED' });
     });
   });
 };
