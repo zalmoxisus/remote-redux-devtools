@@ -16,5 +16,9 @@ module.exports.run = function(worker) {
       });
       respond(null, channelName);
     });
+    socket.on('disconnect', function() {
+      var channel = worker.exchange.channel('sc-' + socket.id);
+      channel.unsubscribe(); channel.destroy();
+    });
   });
 };
