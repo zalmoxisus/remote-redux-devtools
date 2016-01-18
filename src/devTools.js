@@ -22,7 +22,7 @@ function relay(type, state, action, nextActionId) {
     };
     if (shouldInit) shouldInit = false;
 
-    socket.emit('log', message);
+    socket.emit(socket.id ? 'log' : 'log-noid', message);
   }, 0);
 }
 

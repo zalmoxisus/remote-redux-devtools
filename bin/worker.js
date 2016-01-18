@@ -4,6 +4,8 @@ module.exports.run = function(worker) {
   scServer.addMiddleware(scServer.MIDDLEWARE_EMIT, function (socket, channel, data, next) {
     if (channel.substr(0, 3) === 'sc-' || channel === 'respond' || channel === 'log') {
       scServer.exchange.publish(channel, data);
+    } else if (channel === 'log-noid') {
+      scServer.exchange.publish('log', { id: socket.id, data: data });
     }
     next();
   });
