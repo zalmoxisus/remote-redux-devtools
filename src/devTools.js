@@ -1,4 +1,4 @@
-import { stringify } from 'jsan';
+import { stringify, parse } from 'jsan';
 import socketCluster from 'socketcluster-client';
 import configureStore from './configureStore';
 import { socketOptions } from './constants';
@@ -33,6 +33,12 @@ function handleMessages(message) {
     store.liftedStore.dispatch(message.action);
   } else if (message.type === 'UPDATE') {
     relay('STATE', store.liftedStore.getState());
+  } else if (message.type === 'SYNC') {
+    if (socket.id && message.id !== socket.id) {
+      store.liftedStore.dispatch({
+        type: 'IMPORT_STATE', nextLiftedState: parse(message.state)
+      });
+    }
   }
 }
 
