@@ -3,6 +3,7 @@ import socketCluster from 'socketcluster-client';
 import configureStore from './configureStore';
 import { socketOptions } from './constants';
 
+let instanceName;
 let socket;
 let channel;
 let store = {};
@@ -18,6 +19,7 @@ function relay(type, state, action, nextActionId) {
       nextActionId: nextActionId || '',
       type: type,
       id: socket.id,
+      name: instanceName,
       init: shouldInit
     };
     if (shouldInit) shouldInit = false;
@@ -34,10 +36,10 @@ function handleMessages(message) {
   }
 }
 
-function init(options = socketOptions) {
+function init(options) {
   if (channel) channel.unwatch();
   if (socket) socket.disconnect();
-  socket = socketCluster.connect(options);
+  socket = socketCluster.connect(options && options.port ? options : socketOptions);
 
   socket.emit('login', 'master', (err, channelName) => {
     if (err) { console.error(err); return; }
@@ -45,6 +47,8 @@ function init(options = socketOptions) {
     channel.watch(handleMessages);
     socket.on(channelName, handleMessages);
   });
+
+  instanceName = options.name;
 }
 
 function subscriber(state = {}, action) {
