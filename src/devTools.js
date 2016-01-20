@@ -54,7 +54,7 @@ function init(options) {
     socket.on(channelName, handleMessages);
   });
 
-  instanceName = options.name;
+  if (options) instanceName = options.name;
 }
 
 function subscriber(state = {}, action) {
