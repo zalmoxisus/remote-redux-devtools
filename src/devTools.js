@@ -65,7 +65,7 @@ function subscriber(state = {}, action) {
     } else if (action.type === 'PERFORM_ACTION') {
       actionsCount++;
       relay('ACTION', reducedState, action, actionsCount);
-    } else {
+    } else if (action.type !== 'JUMP_TO_STATE') {
       setTimeout(() => {
         const liftedState = store.liftedStore.getState();
         relay('STATE', liftedState);
