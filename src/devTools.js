@@ -17,7 +17,7 @@ function relay(type, state, action, nextActionId) {
       payload: state ? stringify(state) : '',
       action: action ? stringify(action) : '',
       nextActionId: nextActionId || '',
-      type: type,
+      type,
       id: socket.id,
       name: instanceName,
       init: shouldInit
