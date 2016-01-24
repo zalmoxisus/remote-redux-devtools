@@ -3,11 +3,7 @@
   "version": "0.0.10",
   "description": "Relay Redux actions to remote Redux DevTools.",
   "main": "lib/index.js",
-  "bin": {
-    "remotedev": "bin/remotedev.js"
-  },
   "files": [
-    "bin",
     "lib"
   ],
   "scripts": {
@@ -56,11 +52,9 @@
   },
   "dependencies": {
     "jsan": "^2.0.4",
-    "minimist": "^1.2.0",
     "querystring": "^0.2.0",
     "redux": "^3.0.5",
     "redux-devtools": "^3.0.1",
-    "socketcluster": "^3.0.0",
     "socketcluster-client": "^4.1.6"
   }
 }

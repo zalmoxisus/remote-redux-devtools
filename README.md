@@ -48,7 +48,7 @@ Also, it can be [used in React Native debugger as a dock monitor](https://github
 
 ### Communicate via local server
 
-In order to make it simple to use, by default, the module and the monitor app communicate via [remotedev.io](http://remotedev.io) server. Run it locally to make it faster and not to require an internet connection.
+In order to make it simple to use, by default, the module and the monitor app communicate via [remotedev.io](http://remotedev.io) server. Use [remotedev-server](https://github.com/zalmoxisus/remotedev-server) cli to run it locally in order to make the connection faster and not to require an internet connection.
 
 ### Props
 
