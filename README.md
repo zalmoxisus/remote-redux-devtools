@@ -50,7 +50,8 @@ Also, it can be [used in React Native debugger as a dock monitor](https://github
 
 In order to make it simple to use, by default, the module and the monitor app communicate via [remotedev.io](http://remotedev.io) server. Use [remotedev-server](https://github.com/zalmoxisus/remotedev-server) cli to run it locally in order to make the connection faster and not to require an internet connection.
 
-### Props
+
+### Parameters
 
 Name                  | Description
 -------------         | -------------
@@ -59,6 +60,18 @@ Name                  | Description
 `port`                | Local host's port.
 
 All props are optional. You have to provide at least `port` property to use `localhost` instead of `remotedev.io` server.
+
+Example:
+```js
+export default function configureStore(initialState) {
+  const finalCreateStore = compose(
+    devTools({ hostname: 'localhost', port: 8000, name: 'Android app' })
+  )(createStore);
+
+  const store = finalCreateStore(rootReducer, initialState);
+  return store;
+}
+```
 
 ### Examples
 - [Web](https://github.com/zalmoxisus/remote-redux-devtools/tree/master/examples)
