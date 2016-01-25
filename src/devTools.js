@@ -8,8 +8,7 @@ let socket;
 let channel;
 let store = {};
 let shouldInit = true;
-let actionsCount = 0;
-let reducedState;
+let lastAction;
 
 function relay(type, state, action, nextActionId) {
   setTimeout(() => {
@@ -55,38 +54,34 @@ function init(options) {
   });
 
   if (options) instanceName = options.name;
+  relay('STATE', store.liftedStore.getState());
 }
 
-function subscriber(state = {}, action) {
-  if (action && action.type) {
-    if (action.type === '@@redux/INIT') {
-      actionsCount = 1;
-      relay('INIT', reducedState, { timestamp: Date.now() });
-    } else if (action.type === 'PERFORM_ACTION') {
-      actionsCount++;
-      relay('ACTION', reducedState, action, actionsCount);
-    } else if (action.type !== 'JUMP_TO_STATE') {
-      setTimeout(() => {
-        const liftedState = store.liftedStore.getState();
-        relay('STATE', liftedState);
-      }, 0);
-    }
-  }
+function monitorReducer(state = {}, action) {
+  lastAction = action.type;
   return state;
 }
 
-function createReducer(reducer) {
-  return (state, action) => {
-    reducedState = reducer(state, action);
-    return reducedState;
-  };
+function handleChange(state, liftedState) {
+  const nextActionId = liftedState.nextActionId;
+  const liftedAction = liftedState.actionsById[nextActionId - 1];
+  const action = liftedAction.action;
+  if (action.type === '@@INIT') {
+    relay('INIT', state, { timestamp: Date.now() });
+  } else if (lastAction !== 'TOGGLE_ACTION' && lastAction !== 'SWEEP') {
+    if (lastAction === 'JUMP_TO_STATE') return;
+    relay('ACTION', state, liftedAction, nextActionId);
+  } else {
+    relay('STATE', liftedState);
+  }
 }
 
 export default function devTools(options) {
   return (next) => {
     return (reducer, initialState) => {
+      store = configureStore(next, monitorReducer)(reducer, initialState);
       init(options);
-      store = configureStore(next, subscriber)(createReducer(reducer), initialState);
+      store.subscribe(() => { handleChange(store.getState(), store.liftedStore.getState()); });
       return store;
     };
   };
