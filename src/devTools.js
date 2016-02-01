@@ -46,6 +46,10 @@ function init(options) {
   if (socket) socket.disconnect();
   socket = socketCluster.connect(options && options.port ? options : socketOptions);
 
+  socket.on('error', function(err){
+   console.error(err);
+  });
+
   socket.emit('login', 'master', (err, channelName) => {
     if (err) { console.error(err); return; }
     channel = socket.subscribe(channelName);
