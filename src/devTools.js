@@ -44,6 +44,9 @@ function handleMessages(message) {
 function init(options) {
   if (channel) channel.unwatch();
   if (socket) socket.disconnect();
+  if (options && options.port && !options.hostname) {
+    options.hostname = 'localhost';
+  }
   socket = socketCluster.connect(options && options.port ? options : socketOptions);
 
   socket.on('error', function (err) {
