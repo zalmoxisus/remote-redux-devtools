@@ -24,14 +24,12 @@ import devTools from 'remote-redux-devtools';
 import reducer from '../reducers';
 
 export default function configureStore(initialState) {
-  const finalCreateStore = compose(
+  const enhancer = compose(
     applyMiddleware(thunk),
     devTools()
-  )(createStore);
-
-  const store = finalCreateStore(reducer, initialState);
-
-  return store;
+  );
+  // Note: passing enhancer as last argument requires redux@>=3.1.0
+  return createStore(reducer, initialState, enhancer);
 }
 ```
 
@@ -64,12 +62,12 @@ All props are optional. You have to provide at least `port` property to use `loc
 Example:
 ```js
 export default function configureStore(initialState) {
-  const finalCreateStore = compose(
+  // Note: passing enhancer as last argument requires redux@>=3.1.0
+  return createStore(
+    rootReducer,
+    initialState,
     devTools({ hostname: 'localhost', port: 8000, name: 'Android app' })
-  )(createStore);
-
-  const store = finalCreateStore(rootReducer, initialState);
-  return store;
+  );
 }
 ```
 
