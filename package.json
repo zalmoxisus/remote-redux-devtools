@@ -53,7 +53,6 @@
   "dependencies": {
     "jsan": "^2.0.4",
     "querystring": "^0.2.0",
-    "redux": "^3.0.5",
     "redux-devtools": "^3.0.1",
     "socketcluster-client": "^4.3.2"
   }
