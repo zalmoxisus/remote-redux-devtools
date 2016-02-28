@@ -9,23 +9,35 @@ let channel;
 let store = {};
 let shouldInit = true;
 let lastAction;
+let filters = {};
+
+function isMonitored(actionType) {
+  return (
+    filters.whitelist && actionType.match(filters.whitelist.join('|')) ||
+    filters.blacklist && !actionType.match(filters.blacklist.join('|'))
+  );
+}
+
 
 function relay(type, state, action, nextActionId) {
-  setTimeout(() => {
-    const message = {
-      payload: state ? stringify(state) : '',
-      action: action ? stringify(action) : '',
-      nextActionId: nextActionId || '',
-      type,
-      id: socket.id,
-      name: instanceName,
-      init: shouldInit
-    };
-    if (shouldInit) shouldInit = false;
+  if (isMonitored(type)) {
+    setTimeout(() => {
+      const message = {
+        payload: state ? stringify(state) : '',
+        action: action ? stringify(action) : '',
+        nextActionId: nextActionId || '',
+        type,
+        id: socket.id,
+        name: instanceName,
+        init: shouldInit
+      };
+      if (shouldInit) shouldInit = false;
 
-    socket.emit(socket.id ? 'log' : 'log-noid', message);
-  }, 0);
+      socket.emit(socket.id ? 'log' : 'log-noid', message);
+    }, 0);
+  }
 }
+
 
 function handleMessages(message) {
   if (message.type === 'DISPATCH') {
@@ -59,7 +71,9 @@ function init(options) {
     channel.watch(handleMessages);
     socket.on(channelName, handleMessages);
   });
-
+  if (options && options.filters) {
+    filters = options.filters;
+  }
   if (options) instanceName = options.name;
   relay('STATE', store.liftedStore.getState());
 }
