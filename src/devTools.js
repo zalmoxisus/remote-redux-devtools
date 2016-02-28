@@ -13,29 +13,31 @@ let filters = {};
 
 function isMonitored(actionType) {
   return (
-    filters.whitelist && actionType.match(filters.whitelist.join('|')) ||
-    filters.blacklist && !actionType.match(filters.blacklist.join('|'))
+    !actionType ||
+    (!filters.whitelist && !filters.blacklist) ||
+    (filters.whitelist && actionType.match(filters.whitelist.join('|'))) ||
+    (filters.blacklist && !actionType.match(filters.blacklist.join('|')))
   );
 }
 
 
 function relay(type, state, action, nextActionId) {
-  if (isMonitored(type)) {
-    setTimeout(() => {
-      const message = {
-        payload: state ? stringify(state) : '',
-        action: action ? stringify(action) : '',
-        nextActionId: nextActionId || '',
-        type,
-        id: socket.id,
-        name: instanceName,
-        init: shouldInit
-      };
-      if (shouldInit) shouldInit = false;
+  setTimeout(() => {
+    const message = {
+      payload: state ? stringify(state) : '',
+      action: action ? stringify(action) : '',
+      nextActionId: nextActionId || '',
+      type,
+      id: socket.id,
+      name: instanceName,
+      init: shouldInit
+    };
+    if (shouldInit) shouldInit = false;
 
+    if (!action || (action && action.action && isMonitored(action.action.type))) {
       socket.emit(socket.id ? 'log' : 'log-noid', message);
-    }, 0);
-  }
+    }
+  }, 0);
 }
 
 
