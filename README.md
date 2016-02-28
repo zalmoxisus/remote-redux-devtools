@@ -56,6 +56,8 @@ Name                  | Description
 `name`                | Instance name to be showed in the app.
 `hostname`            | If `port` is specified, default value is `localhost`.
 `port`                | Local host's port.
+`blacklist`           | Array of action type strings to exclude
+`whitelist`           | Array of action type strings to include
 
 All props are optional. You have to provide at least `port` property to use `localhost` instead of `remotedev.io` server.
 
