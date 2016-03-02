@@ -63,7 +63,7 @@ function init(options) {
   socket = socketCluster.connect(options && options.port ? options : socketOptions);
 
   socket.on('error', function (err) {
-    console.error(err);
+    console.warn(err);
   });
 
   socket.emit('login', 'master', (err, channelName) => {
