@@ -9,23 +9,36 @@ let channel;
 let store = {};
 let shouldInit = true;
 let lastAction;
+let filters = {};
+
+function isMonitored(actionType) {
+  return (
+    !actionType ||
+    (!filters.whitelist && !filters.blacklist) ||
+    (filters.whitelist && actionType.match(filters.whitelist.join('|'))) ||
+    (filters.blacklist && !actionType.match(filters.blacklist.join('|')))
+  );
+}
+
 
 function relay(type, state, action, nextActionId) {
-  setTimeout(() => {
-    const message = {
-      payload: state ? stringify(state) : '',
-      action: action ? stringify(action) : '',
-      nextActionId: nextActionId || '',
-      type,
-      id: socket.id,
-      name: instanceName,
-      init: shouldInit
-    };
-    if (shouldInit) shouldInit = false;
-
-    socket.emit(socket.id ? 'log' : 'log-noid', message);
-  }, 0);
+  if (!action || (action && action.action && isMonitored(action.action.type))) {
+    setTimeout(() => {
+      const message = {
+        payload: state ? stringify(state) : '',
+        action: action ? stringify(action) : '',
+        nextActionId: nextActionId || '',
+        type,
+        id: socket.id,
+        name: instanceName,
+        init: shouldInit
+      };
+      if (shouldInit) shouldInit = false;
+      socket.emit(socket.id ? 'log' : 'log-noid', message);
+    }, 0);
+  }
 }
+
 
 function handleMessages(message) {
   if (message.type === 'DISPATCH') {
@@ -59,7 +72,9 @@ function init(options) {
     channel.watch(handleMessages);
     socket.on(channelName, handleMessages);
   });
-
+  if (options && options.filters) {
+    filters = options.filters;
+  }
   if (options) instanceName = options.name;
   relay('STATE', store.liftedStore.getState());
 }
@@ -67,6 +82,25 @@ function init(options) {
 function monitorReducer(state = {}, action) {
   lastAction = action.type;
   return state;
+}
+
+function filterStagedActions(state) {
+  if (!filters.whitelist && !filters.blacklist) return state;
+
+  const filteredStagedActionIds = [];
+  const filteredComputedStates = [];
+
+  state.stagedActionIds.forEach((id, idx) => {
+    if (isMonitored(state.actionsById[id].action.type)) {
+      filteredStagedActionIds.push(id);
+      filteredComputedStates.push(state.computedStates[idx]);
+    }
+  });
+
+  return Object.assign({}, state, {
+    stagedActionIds: filteredStagedActionIds,
+    computedStates: filteredComputedStates
+  });
 }
 
 function handleChange(state, liftedState) {
@@ -79,7 +113,7 @@ function handleChange(state, liftedState) {
     if (lastAction === 'JUMP_TO_STATE') return;
     relay('ACTION', state, liftedAction, nextActionId);
   } else {
-    relay('STATE', liftedState);
+    relay('STATE', filterStagedActions(liftedState));
   }
 }
 
