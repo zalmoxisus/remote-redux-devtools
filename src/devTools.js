@@ -21,7 +21,7 @@ function isMonitored(actionType) {
 }
 
 
-function relay(type, state, action, nextActionId, allowStateFilter = false) {
+function relay(type, state, action, nextActionId) {
   if (!action || (action && action.action && isMonitored(action.action.type))) {
     setTimeout(() => {
       const message = {
