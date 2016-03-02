@@ -21,23 +21,22 @@ function isMonitored(actionType) {
 }
 
 
-function relay(type, state, action, nextActionId) {
-  setTimeout(() => {
-    const message = {
-      payload: state ? stringify(state) : '',
-      action: action ? stringify(action) : '',
-      nextActionId: nextActionId || '',
-      type,
-      id: socket.id,
-      name: instanceName,
-      init: shouldInit
-    };
-    if (shouldInit) shouldInit = false;
-
-    if (!action || (action && action.action && isMonitored(action.action.type))) {
+function relay(type, state, action, nextActionId, allowStateFilter = false) {
+  if (!action || (action && action.action && isMonitored(action.action.type))) {
+    setTimeout(() => {
+      const message = {
+        payload: state ? stringify(state) : '',
+        action: action ? stringify(action) : '',
+        nextActionId: nextActionId || '',
+        type,
+        id: socket.id,
+        name: instanceName,
+        init: shouldInit
+      };
+      if (shouldInit) shouldInit = false;
       socket.emit(socket.id ? 'log' : 'log-noid', message);
-    }
-  }, 0);
+    }, 0);
+  }
 }
 
 
@@ -85,6 +84,25 @@ function monitorReducer(state = {}, action) {
   return state;
 }
 
+function filterStagedActions(state) {
+  if (!filters.whitelist && !filters.blacklist) return state;
+
+  const filteredStagedActionIds = [];
+  const filteredComputedStates = [];
+
+  state.stagedActionIds.forEach((id, idx) => {
+    if (isMonitored(state.actionsById[id].action.type)) {
+      filteredStagedActionIds.push(id);
+      filteredComputedStates.push(state.computedStates[idx]);
+    }
+  });
+
+  return Object.assign({}, state, {
+    stagedActionIds: filteredStagedActionIds,
+    computedStates: filteredComputedStates
+  });
+}
+
 function handleChange(state, liftedState) {
   const nextActionId = liftedState.nextActionId;
   const liftedAction = liftedState.actionsById[nextActionId - 1];
@@ -95,7 +113,7 @@ function handleChange(state, liftedState) {
     if (lastAction === 'JUMP_TO_STATE') return;
     relay('ACTION', state, liftedAction, nextActionId);
   } else {
-    relay('STATE', liftedState);
+    relay('STATE', filterStagedActions(liftedState));
   }
 }
 
