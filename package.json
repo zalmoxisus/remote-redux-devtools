@@ -54,6 +54,6 @@
     "jsan": "^2.0.4",
     "querystring": "^0.2.0",
     "redux-devtools": "^3.1.1",
-    "socketcluster-client": "^4.3.3"
+    "socketcluster-client": "^4.3.7"
   }
 }
