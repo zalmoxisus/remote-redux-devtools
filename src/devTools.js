@@ -9,34 +9,32 @@ let channel;
 let store = {};
 let shouldInit = true;
 let lastAction;
-let filters = {};
+let filters;
 
-function isMonitored(actionType) {
+function isFiltered(action) {
+  if (!action || !action.action || !action.action.type) return false;
   return (
-    !actionType ||
-    (!filters.whitelist && !filters.blacklist) ||
-    (filters.whitelist && actionType.match(filters.whitelist.join('|'))) ||
-    (filters.blacklist && !actionType.match(filters.blacklist.join('|')))
+    filters.whitelist && !action.action.type.match(filters.whitelist.join('|')) ||
+    filters.blacklist && action.action.type.match(filters.blacklist.join('|'))
   );
 }
 
 
 function relay(type, state, action, nextActionId) {
-  if (!action || (action && action.action && isMonitored(action.action.type))) {
-    setTimeout(() => {
-      const message = {
-        payload: state ? stringify(state) : '',
-        action: action ? stringify(action) : '',
-        nextActionId: nextActionId || '',
-        type,
-        id: socket.id,
-        name: instanceName,
-        init: shouldInit
-      };
-      if (shouldInit) shouldInit = false;
-      socket.emit(socket.id ? 'log' : 'log-noid', message);
-    }, 0);
-  }
+  if (filters && isFiltered(action)) return;
+  setTimeout(() => {
+    const message = {
+      payload: state ? stringify(state) : '',
+      action: action ? stringify(action) : '',
+      nextActionId: nextActionId || '',
+      type,
+      id: socket.id,
+      name: instanceName,
+      init: shouldInit
+    };
+    if (shouldInit) shouldInit = false;
+    socket.emit(socket.id ? 'log' : 'log-noid', message);
+  }, 0);
 }
 
 
@@ -85,13 +83,13 @@ function monitorReducer(state = {}, action) {
 }
 
 function filterStagedActions(state) {
-  if (!filters.whitelist && !filters.blacklist) return state;
+  if (!filters) return state;
 
   const filteredStagedActionIds = [];
   const filteredComputedStates = [];
 
   state.stagedActionIds.forEach((id, idx) => {
-    if (isMonitored(state.actionsById[id].action.type)) {
+    if (!isFiltered(state.actionsById[id])) {
       filteredStagedActionIds.push(id);
       filteredComputedStates.push(state.computedStates[idx]);
     }
