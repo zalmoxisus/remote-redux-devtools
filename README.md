@@ -42,7 +42,12 @@ Use one of [our monitor apps](https://github.com/zalmoxisus/remotedev-app) to in
 
 The source code is [here](https://github.com/zalmoxisus/remotedev-app).
 
-Also, it can be [used in React Native debugger as a dock monitor](https://github.com/jhen0409/remote-redux-devtools-on-debugger).
+It also included in following projects:
+
+* [atom-redux-devtools](https://github.com/zalmoxisus/atom-redux-devtools) - Used in Atom editor.
+* [redux-devtools-extension](https://github.com/zalmoxisus/redux-devtools-extension) - Also included `remotedev-app`.
+* [remotedev-extension](https://github.com/jhen0409/remotedev-extension) - Used in Electron/Browser DevTools.
+* [remote-redux-devtools-on-debugger](https://github.com/jhen0409/remote-redux-devtools-on-debugger) - Used in React Native debugger as a dock monitor.
 
 ### Communicate via local server
 
