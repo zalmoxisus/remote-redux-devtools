@@ -95,10 +95,10 @@ function filterStagedActions(state) {
     }
   });
 
-  return Object.assign({}, state, {
+  return { ...state,
     stagedActionIds: filteredStagedActionIds,
     computedStates: filteredComputedStates
-  });
+  };
 }
 
 function handleChange(state, liftedState) {
