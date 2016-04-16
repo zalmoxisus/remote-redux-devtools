@@ -39,7 +39,9 @@ function relay(type, state, action, nextActionId) {
 
 
 function handleMessages(message) {
-  if (message.type === 'DISPATCH') {
+  if (message.type === 'ACTION') {
+    store.dispatch(message.action);
+  } if (message.type === 'DISPATCH') {
     store.liftedStore.dispatch(message.action);
   } else if (message.type === 'UPDATE') {
     relay('STATE', store.liftedStore.getState());
