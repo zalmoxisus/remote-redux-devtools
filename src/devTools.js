@@ -65,7 +65,7 @@ function init(options) {
   });
 
   socket.emit('login', 'master', (err, channelName) => {
-    if (err) { console.error(err); return; }
+    if (err) { console.warn(err); return; }
     channel = socket.subscribe(channelName);
     channel.watch(handleMessages);
     socket.on(channelName, handleMessages);
