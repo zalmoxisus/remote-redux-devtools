@@ -1,5 +1,5 @@
 import instrument from 'redux-devtools-instrument';
 
-export default function configureStore(next, subscriber = () => ({})) {
-  return instrument(subscriber)(next);
+export default function configureStore(next, subscriber, options) {
+  return instrument(subscriber, options)(next);
 }

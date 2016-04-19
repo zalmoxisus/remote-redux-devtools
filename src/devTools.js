@@ -20,7 +20,7 @@ function isFiltered(action) {
 }
 
 
-function relay(type, state, action, nextActionId) {
+function relay(type, state, action, nextActionId, isExcess) {
   if (filters && isFiltered(action)) return;
   setTimeout(() => {
     const message = {
@@ -30,6 +30,7 @@ function relay(type, state, action, nextActionId) {
       type,
       id: socket.id,
       name: instanceName,
+      isExcess,
       init: shouldInit
     };
     if (shouldInit) shouldInit = false;
@@ -103,7 +104,7 @@ function filterStagedActions(state) {
   };
 }
 
-function handleChange(state, liftedState) {
+function handleChange(state, liftedState, maxAge) {
   const nextActionId = liftedState.nextActionId;
   const liftedAction = liftedState.actionsById[nextActionId - 1];
   const action = liftedAction.action;
@@ -111,18 +112,22 @@ function handleChange(state, liftedState) {
     relay('INIT', state, { timestamp: Date.now() });
   } else if (lastAction !== 'TOGGLE_ACTION' && lastAction !== 'SWEEP') {
     if (lastAction === 'JUMP_TO_STATE') return;
-    relay('ACTION', state, liftedAction, nextActionId);
+    const isExcess = maxAge && liftedState.stagedActionIds.length === maxAge;
+    relay('ACTION', state, liftedAction, nextActionId, isExcess);
   } else {
     relay('STATE', filterStagedActions(liftedState));
   }
 }
 
 export default function devTools(options) {
+  const maxAge = options.maxAge || 30;
   return (next) => {
     return (reducer, initialState) => {
-      store = configureStore(next, monitorReducer)(reducer, initialState);
+      store = configureStore(
+        next, monitorReducer, { maxAge }
+      )(reducer, initialState);
       init(options);
-      store.subscribe(() => { handleChange(store.getState(), store.liftedStore.getState()); });
+      store.subscribe(() => { handleChange(store.getState(), store.liftedStore.getState(), maxAge); });
       return store;
     };
   };

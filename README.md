@@ -62,6 +62,7 @@ Name                  | Description
 `hostname`            | If `port` is specified, default value is `localhost`.
 `port`                | Local host's port.
 `filters`             | Map of arrays named `whitelist` or `blacklist` to filter action types.
+`maxAge`              | Number of maximum allowed actions to be stored on the history tree, the oldest actions are removed once maxAge is reached. Default is `30`.
 
 
 All props are optional. You have to provide at least `port` property to use `localhost` instead of `remotedev.io` server.
@@ -73,7 +74,7 @@ export default function configureStore(initialState) {
   return createStore(
     rootReducer,
     initialState,
-    devTools({ hostname: 'localhost', port: 8000, name: 'Android app', filters: { blacklist: ['EFFECT_RESOLVED'] }})
+    devTools({ name: 'Android app', hostname: 'localhost', port: 8000, maxAge: 30, filters: { blacklist: ['EFFECT_RESOLVED'] }})
   );
 }
 ```
