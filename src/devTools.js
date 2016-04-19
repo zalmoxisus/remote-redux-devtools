@@ -120,7 +120,7 @@ function handleChange(state, liftedState, maxAge) {
 }
 
 export default function devTools(options) {
-  const maxAge = options.maxAge || 30;
+  const maxAge = options && options.maxAge || 30;
   return (next) => {
     return (reducer, initialState) => {
       store = configureStore(
