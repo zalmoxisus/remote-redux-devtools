@@ -10,6 +10,7 @@ let store = {};
 let shouldInit = true;
 let lastAction;
 let filters;
+let isExcess;
 
 function isFiltered(action) {
   if (!action || !action.action || !action.action.type) return false;
@@ -20,7 +21,7 @@ function isFiltered(action) {
 }
 
 
-function relay(type, state, action, nextActionId, isExcess) {
+function relay(type, state, action, nextActionId) {
   if (filters && isFiltered(action)) return;
   const message = {
     payload: state ? stringify(state) : '',
@@ -110,8 +111,8 @@ function handleChange(state, liftedState, maxAge) {
     relay('INIT', state, { timestamp: Date.now() });
   } else if (lastAction !== 'TOGGLE_ACTION' && lastAction !== 'SWEEP') {
     if (lastAction === 'JUMP_TO_STATE') return;
-    const isExcess = maxAge && liftedState.stagedActionIds.length === maxAge;
-    relay('ACTION', state, liftedAction, nextActionId, isExcess);
+    relay('ACTION', state, liftedAction, nextActionId);
+    if (!isExcess && maxAge) isExcess = liftedState.stagedActionIds.length >= maxAge;
   } else {
     relay('STATE', filterStagedActions(liftedState));
   }
