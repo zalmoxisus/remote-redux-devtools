@@ -22,20 +22,18 @@ function isFiltered(action) {
 
 function relay(type, state, action, nextActionId, isExcess) {
   if (filters && isFiltered(action)) return;
-  setTimeout(() => {
-    const message = {
-      payload: state ? stringify(state) : '',
-      action: action ? stringify(action) : '',
-      nextActionId: nextActionId || '',
-      type,
-      id: socket.id,
-      name: instanceName,
-      isExcess,
-      init: shouldInit
-    };
-    if (shouldInit) shouldInit = false;
-    socket.emit(socket.id ? 'log' : 'log-noid', message);
-  }, 0);
+  const message = {
+    payload: state ? stringify(state) : '',
+    action: action ? stringify(action) : '',
+    nextActionId: nextActionId || '',
+    type,
+    id: socket.id,
+    name: instanceName,
+    isExcess,
+    init: shouldInit
+  };
+  if (shouldInit) shouldInit = false;
+  socket.emit(socket.id ? 'log' : 'log-noid', message);
 }
 
 
