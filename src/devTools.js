@@ -7,7 +7,6 @@ let instanceName;
 let socket;
 let channel;
 let store = {};
-let shouldInit = true;
 let lastAction;
 let filters;
 let isExcess;
@@ -30,10 +29,8 @@ function relay(type, state, action, nextActionId) {
     type,
     id: socket.id,
     name: instanceName,
-    isExcess,
-    init: shouldInit
+    isExcess
   };
-  if (shouldInit) shouldInit = false;
   socket.emit(socket.id ? 'log' : 'log-noid', message);
 }
 
