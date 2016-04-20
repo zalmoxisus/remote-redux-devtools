@@ -10,6 +10,7 @@ let store = {};
 let lastAction;
 let filters;
 let isExcess;
+let isMonitored;
 
 function isFiltered(action) {
   if (!action || !action.action || !action.action.type) return false;
@@ -18,7 +19,6 @@ function isFiltered(action) {
     filters.blacklist && action.action.type.match(filters.blacklist.join('|'))
   );
 }
-
 
 function relay(type, state, action, nextActionId) {
   if (filters && isFiltered(action)) return;
@@ -34,6 +34,24 @@ function relay(type, state, action, nextActionId) {
   socket.emit(socket.id ? 'log' : 'log-noid', message);
 }
 
+function filterStagedActions(state) {
+  if (!filters) return state;
+
+  const filteredStagedActionIds = [];
+  const filteredComputedStates = [];
+
+  state.stagedActionIds.forEach((id, idx) => {
+    if (!isFiltered(state.actionsById[id])) {
+      filteredStagedActionIds.push(id);
+      filteredComputedStates.push(state.computedStates[idx]);
+    }
+  });
+
+  return { ...state,
+    stagedActionIds: filteredStagedActionIds,
+    computedStates: filteredComputedStates
+  };
+}
 
 function handleMessages(message) {
   if (message.type === 'ACTION') {
@@ -41,13 +59,18 @@ function handleMessages(message) {
   } if (message.type === 'DISPATCH') {
     store.liftedStore.dispatch(message.action);
   } else if (message.type === 'UPDATE') {
-    relay('STATE', store.liftedStore.getState());
+    relay('STATE', filterStagedActions(store.liftedStore.getState()));
   } else if (message.type === 'SYNC') {
     if (socket.id && message.id !== socket.id) {
       store.liftedStore.dispatch({
         type: 'IMPORT_STATE', nextLiftedState: parse(message.state)
       });
     }
+  } else if (message.type === 'START') {
+    isMonitored = true;
+  } else if (message.type === 'STOP' || message.type === 'DISCONNECTED') {
+    isMonitored = false;
+    relay('STOP');
   }
 }
 
@@ -81,25 +104,6 @@ function monitorReducer(state = {}, action) {
   return state;
 }
 
-function filterStagedActions(state) {
-  if (!filters) return state;
-
-  const filteredStagedActionIds = [];
-  const filteredComputedStates = [];
-
-  state.stagedActionIds.forEach((id, idx) => {
-    if (!isFiltered(state.actionsById[id])) {
-      filteredStagedActionIds.push(id);
-      filteredComputedStates.push(state.computedStates[idx]);
-    }
-  });
-
-  return { ...state,
-    stagedActionIds: filteredStagedActionIds,
-    computedStates: filteredComputedStates
-  };
-}
-
 function handleChange(state, liftedState, maxAge) {
   const nextActionId = liftedState.nextActionId;
   const liftedAction = liftedState.actionsById[nextActionId - 1];
@@ -123,7 +127,9 @@ export default function devTools(options) {
         next, monitorReducer, { maxAge }
       )(reducer, initialState);
       init(options);
-      store.subscribe(() => { handleChange(store.getState(), store.liftedStore.getState(), maxAge); });
+      store.subscribe(() => {
+        if (isMonitored) handleChange(store.getState(), store.liftedStore.getState(), maxAge);
+      });
       return store;
     };
   };
