@@ -3,6 +3,10 @@ import socketCluster from 'socketcluster-client';
 import configureStore from './configureStore';
 import { socketOptions } from './constants';
 
+const monitorActions = [ // To be skipped for relaying actions
+  'TOGGLE_ACTION', 'SWEEP', 'IMPORT_STATE', 'SET_ACTIONS_ACTIVE'
+];
+
 let instanceName;
 let socket;
 let channel;
@@ -54,18 +58,18 @@ function filterStagedActions(state) {
 }
 
 function handleMessages(message) {
-  if (message.type === 'ACTION') {
-    store.dispatch(message.action);
-  } if (message.type === 'DISPATCH') {
-    store.liftedStore.dispatch(message.action);
-  } else if (message.type === 'UPDATE') {
+  if (
+    message.type === 'IMPORT' || message.type === 'SYNC' && socket.id && message.id !== socket.id
+  ) {
+    store.liftedStore.dispatch({
+      type: 'IMPORT_STATE', nextLiftedState: parse(message.state)
+    });
+  } if (message.type === 'UPDATE' || message.type === 'IMPORT') {
     relay('STATE', filterStagedActions(store.liftedStore.getState()));
-  } else if (message.type === 'SYNC') {
-    if (socket.id && message.id !== socket.id) {
-      store.liftedStore.dispatch({
-        type: 'IMPORT_STATE', nextLiftedState: parse(message.state)
-      });
-    }
+  } else if (message.type === 'ACTION') {
+    store.dispatch(message.action);
+  } else if (message.type === 'DISPATCH') {
+    store.liftedStore.dispatch(message.action);
   } else if (message.type === 'START') {
     isMonitored = true;
   } else if (message.type === 'STOP' || message.type === 'DISCONNECTED') {
@@ -110,7 +114,7 @@ function handleChange(state, liftedState, maxAge) {
   const action = liftedAction.action;
   if (action.type === '@@INIT') {
     relay('INIT', state, { timestamp: Date.now() });
-  } else if (lastAction !== 'TOGGLE_ACTION' && lastAction !== 'SWEEP') {
+  } else if (monitorActions.indexOf(lastAction) === -1) {
     if (lastAction === 'JUMP_TO_STATE') return;
     relay('ACTION', state, liftedAction, nextActionId);
     if (!isExcess && maxAge) isExcess = liftedState.stagedActionIds.length >= maxAge;
