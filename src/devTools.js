@@ -64,17 +64,17 @@ function handleMessages(message) {
     store.liftedStore.dispatch({
       type: 'IMPORT_STATE', nextLiftedState: parse(message.state)
     });
-  } if (message.type === 'UPDATE' || message.type === 'IMPORT') {
+  } if (message.type === 'UPDATE' || message.type === 'IMPORT' || message.type === 'START') {
     relay('STATE', filterStagedActions(store.liftedStore.getState()));
-  } else if (message.type === 'ACTION') {
-    store.dispatch(message.action);
-  } else if (message.type === 'DISPATCH') {
-    store.liftedStore.dispatch(message.action);
-  } else if (message.type === 'START') {
+  } if (message.type === 'START') {
     isMonitored = true;
   } else if (message.type === 'STOP' || message.type === 'DISCONNECTED') {
     isMonitored = false;
     relay('STOP');
+  } else if (message.type === 'ACTION') {
+    store.dispatch(message.action);
+  } else if (message.type === 'DISPATCH') {
+    store.liftedStore.dispatch(message.action);
   }
 }
 
