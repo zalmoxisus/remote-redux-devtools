@@ -16,8 +16,9 @@ let lastAction;
 let filters;
 let isExcess;
 let isMonitored;
-let startOn;
 let started;
+let startOn;
+let stopOn;
 
 function isFiltered(action) {
   if (!action || !action.action || !action.action.type) return false;
@@ -81,6 +82,10 @@ function handleMessages(message) {
   }
 }
 
+function str2array(str) {
+  return typeof str === 'string' ? [str] : str && str.length;
+}
+
 function init(options) {
   instanceName = options.name;
   if (options.filters) {
@@ -93,9 +98,8 @@ function init(options) {
     };
   } else socketOptions = defaultSocketOptions;
 
-  startOn = typeof options.startOn === 'string'
-    ? [options.startOn]
-    : options.startOn && options.startOn.length;
+  startOn = str2array(options.startOn);
+  stopOn = str2array(options.stopOn);
 }
 
 function start() {
@@ -115,8 +119,18 @@ function start() {
   relay('STATE', store.liftedStore.getState());
 }
 
+function stop() {
+  started = false;
+  isMonitored = false;
+  if (channel) channel.unwatch();
+  if (socket) socket.disconnect();
+}
+
 function monitorReducer(state = {}, action) {
-  if (!started && action.action && startOn.indexOf(action.action.type) !== -1) start();
+  if (action.action) {
+    if (startOn && !started && startOn.indexOf(action.action.type) !== -1) start();
+    else if (stopOn && started && stopOn.indexOf(action.action.type) !== -1) stop();
+  }
   lastAction = action.type;
   return state;
 }

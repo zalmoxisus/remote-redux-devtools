@@ -66,6 +66,7 @@ Name                  | Description
 `filters`             | *Map of arrays* named `whitelist` or `blacklist` to filter action types.
 `maxAge`              | *Number* of maximum allowed actions to be stored on the history tree, the oldest actions are removed once maxAge is reached. Default is `30`.
 `startOn`             | *String* or *Array of strings* indicating an action or a list of actions, which should start remote monitoring (when `realtime` is `false`). 
+`stopOn`              | *String* or *Array of strings* indicating an action or a list of actions, which should stop remote monitoring. 
 
 All props are optional. You have to provide at least `port` property to use `localhost` instead of `remotedev.io` server.
 
