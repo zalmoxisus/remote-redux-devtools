@@ -123,8 +123,13 @@ function handleChange(state, liftedState, maxAge) {
   }
 }
 
-export default function devTools(options) {
-  const maxAge = options && options.maxAge || 30;
+export default function devTools(options = {}) {
+  const realtime = typeof options.realtime === 'undefined'
+    ? process.env.NODE_ENV === 'development'
+    : options.realtime;
+  if (!realtime) return f => f;
+
+  const maxAge = options.maxAge || 30;
   return (next) => {
     return (reducer, initialState) => {
       store = configureStore(
