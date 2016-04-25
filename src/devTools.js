@@ -1,13 +1,14 @@
 import { stringify, parse } from 'jsan';
 import socketCluster from 'socketcluster-client';
 import configureStore from './configureStore';
-import { socketOptions } from './constants';
+import { defaultSocketOptions } from './constants';
 
 const monitorActions = [ // To be skipped for relaying actions
   'TOGGLE_ACTION', 'SWEEP', 'IMPORT_STATE', 'SET_ACTIONS_ACTIVE'
 ];
 
 let instanceName;
+let socketOptions;
 let socket;
 let channel;
 let store = {};
@@ -15,6 +16,8 @@ let lastAction;
 let filters;
 let isExcess;
 let isMonitored;
+let startOn;
+let started;
 
 function isFiltered(action) {
   if (!action || !action.action || !action.action.type) return false;
@@ -79,31 +82,41 @@ function handleMessages(message) {
 }
 
 function init(options) {
-  if (channel) channel.unwatch();
-  if (socket) socket.disconnect();
-  if (options && options.port && !options.hostname) {
-    options.hostname = 'localhost';
+  instanceName = options.name;
+  if (options.filters) {
+    filters = options.filters;
   }
-  socket = socketCluster.connect(options && options.port ? options : socketOptions);
+  if (options.port) {
+    socketOptions = {
+      port: options.port,
+      host: options.hostname || 'localhost'
+    };
+  } else socketOptions = defaultSocketOptions;
 
+  startOn = typeof options.startOn === 'string'
+    ? [options.startOn]
+    : options.startOn && options.startOn.length;
+}
+
+function start() {
+  if (started) return;
+  started = true;
+
+  socket = socketCluster.connect(socketOptions);
   socket.on('error', function (err) {
     console.warn(err);
   });
-
   socket.emit('login', 'master', (err, channelName) => {
     if (err) { console.warn(err); return; }
     channel = socket.subscribe(channelName);
     channel.watch(handleMessages);
     socket.on(channelName, handleMessages);
   });
-  if (options && options.filters) {
-    filters = options.filters;
-  }
-  if (options) instanceName = options.name;
   relay('STATE', store.liftedStore.getState());
 }
 
 function monitorReducer(state = {}, action) {
+  if (!started && action.action && startOn.indexOf(action.action.type) !== -1) start();
   lastAction = action.type;
   return state;
 }
@@ -124,10 +137,10 @@ function handleChange(state, liftedState, maxAge) {
 }
 
 export default function devTools(options = {}) {
+  init(options);
   const realtime = typeof options.realtime === 'undefined'
-    ? process.env.NODE_ENV === 'development'
-    : options.realtime;
-  if (!realtime) return f => f;
+    ? process.env.NODE_ENV === 'development' : options.realtime;
+  if (!realtime && !startOn) return f => f;
 
   const maxAge = options.maxAge || 30;
   return (next) => {
@@ -135,7 +148,8 @@ export default function devTools(options = {}) {
       store = configureStore(
         next, monitorReducer, { maxAge }
       )(reducer, initialState);
-      init(options);
+
+      if (realtime) start();
       store.subscribe(() => {
         if (isMonitored) handleChange(store.getState(), store.liftedStore.getState(), maxAge);
       });
