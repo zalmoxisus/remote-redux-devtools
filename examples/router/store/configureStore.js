@@ -8,7 +8,7 @@ import rootReducer from '../reducers';
 export default function configureStore(initialState) {
   let finalCreateStore = compose(
     reduxReactRouter({ createHistory }),
-    devTools()
+    devTools({ realtime: true })
   )(createStore);
 
   const store = finalCreateStore(rootReducer, initialState);
