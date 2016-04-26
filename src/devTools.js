@@ -122,8 +122,14 @@ function start() {
 function stop() {
   started = false;
   isMonitored = false;
-  if (channel) channel.unwatch();
-  if (socket) socket.disconnect();
+  if (channel) {
+    channel.unsubscribe();
+    channel.unwatch();
+  }
+  if (socket) {
+    socket.off();
+    socket.disconnect();
+  }
 }
 
 function monitorReducer(state = {}, action) {
