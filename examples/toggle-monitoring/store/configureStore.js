@@ -7,7 +7,7 @@ import reducer from '../reducers';
 export default function configureStore(initialState) {
   const finalCreateStore = compose(
     applyMiddleware(invariant(), thunk),
-    devTools({ realtime: true })
+    devTools({ realtime: false, startOn: 'START_MONITORING', stopOn: 'STOP_MONITORING' })
   )(createStore);
 
   const store = finalCreateStore(reducer, initialState);

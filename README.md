@@ -59,12 +59,14 @@ In order to make it simple to use, by default, the module and the monitor app co
 
 Name                  | Description
 -------------         | -------------
-`name`                | Instance name to be showed in the app.
-`hostname`            | If `port` is specified, default value is `localhost`.
-`port`                | Local host's port.
-`filters`             | Map of arrays named `whitelist` or `blacklist` to filter action types.
-`maxAge`              | Number of maximum allowed actions to be stored on the history tree, the oldest actions are removed once maxAge is reached. Default is `30`.
-
+`name`                | *String* representing the instance name to be shown on the remote monitor.
+`realtime`            | *Boolean* specifies whether to allow remote monitoring. By default is `process.env.NODE_ENV === 'development'`. 
+`hostname`            | *String* used for [`remotedev-server`](https://github.com/zalmoxisus/remotedev-server). If `port` is specified, default value is `localhost`.
+`port`                | *Number* used for [`remotedev-server`](https://github.com/zalmoxisus/remotedev-server). Local host's port.
+`filters`             | *Map of arrays* named `whitelist` or `blacklist` to filter action types.
+`maxAge`              | *Number* of maximum allowed actions to be stored on the history tree, the oldest actions are removed once maxAge is reached. Default is `30`.
+`startOn`             | *String* or *Array of strings* indicating an action or a list of actions, which should start remote monitoring (when `realtime` is `false`). 
+`stopOn`              | *String* or *Array of strings* indicating an action or a list of actions, which should stop remote monitoring. 
 
 All props are optional. You have to provide at least `port` property to use `localhost` instead of `remotedev.io` server.
 
@@ -75,7 +77,11 @@ export default function configureStore(initialState) {
   return createStore(
     rootReducer,
     initialState,
-    devTools({ name: 'Android app', hostname: 'localhost', port: 8000, maxAge: 30, filters: { blacklist: ['EFFECT_RESOLVED'] }})
+    devTools({
+      name: 'Android app', realtime: true,
+      hostname: 'localhost', port: 8000,
+      maxAge: 30, filters: { blacklist: ['EFFECT_RESOLVED'] }
+      })
   );
 }
 ```

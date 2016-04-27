@@ -1,4 +1,4 @@
-export const socketOptions = {
+export const defaultSocketOptions = {
   protocol: 'http',
   hostname: 'remotedev.io',
   port: 80,
