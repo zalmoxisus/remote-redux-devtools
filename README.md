@@ -42,9 +42,9 @@ Use one of [our monitor apps](https://github.com/zalmoxisus/remotedev-app) to in
 
 The source code is [here](https://github.com/zalmoxisus/remotedev-app).
 
-It is also included in the following projects:
+It is also included in the following projects, which you can use:
 
-* [redux-devtools-extension](https://github.com/zalmoxisus/redux-devtools-extension) - Also included `remotedev-app`.
+* [redux-devtools-extension](https://github.com/zalmoxisus/redux-devtools-extension) - Click "Remote" button (or press [`Cmd+Ctrl+Arrow up`](https://github.com/zalmoxisus/redux-devtools-extension#keyboard-shortcuts)) to open remote monitoring.
 * [remotedev-extension](https://github.com/jhen0409/remotedev-extension) - Used in Electron/Browser DevTools.
 * [remote-redux-devtools-on-debugger](https://github.com/jhen0409/remote-redux-devtools-on-debugger) - Used in React Native debugger as a dock monitor.
 * [atom-redux-devtools](https://github.com/zalmoxisus/atom-redux-devtools) - Used in Atom editor.
@@ -86,15 +86,12 @@ export default function configureStore(initialState) {
 }
 ```
 
+### Demo
+- [Toggle monitoring](http://zalmoxisus.github.io/monitoring/)
+
 ### Examples
 - [Web](https://github.com/zalmoxisus/remote-redux-devtools/tree/master/examples)
-- [React Native](https://github.com/zalmoxisus/react-native-counter-ios-android).
-
-### Limitations
-
-- Use it only for development, **NOT in production!**
-- The app and the monitor should be under the same external IP address.
-- For web apps it's easier and way faster to use [Chrome extension](https://github.com/zalmoxisus/redux-devtools-extension) instead. The remote monitoring is meant to be used for React Native, hybrid, desktop and server side apps. 
+- [React Native](https://github.com/chentsulin/react-native-counter-ios-android)
 
 ### License
 
