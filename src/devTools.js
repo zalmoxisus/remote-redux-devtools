@@ -31,14 +31,16 @@ function isFiltered(action) {
 function relay(type, state, action, nextActionId) {
   if (filters && isFiltered(action)) return;
   const message = {
-    payload: state ? stringify(state) : '',
-    action: action ? stringify(action) : '',
-    nextActionId: nextActionId || '',
     type,
     id: socket.id,
-    name: instanceName,
-    isExcess
+    name: instanceName
   };
+  if (state) message.payload = stringify(state);
+  if (action) {
+    message.action = stringify(action);
+    message.isExcess = isExcess;
+  }
+  if (nextActionId) message.nextActionId = stringify(nextActionId);
   socket.emit(socket.id ? 'log' : 'log-noid', message);
 }
 
