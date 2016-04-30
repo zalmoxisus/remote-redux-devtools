@@ -69,7 +69,7 @@ Name                  | Description
 `startOn`             | *String* or *Array of strings* indicating an action or a list of actions, which should start remote monitoring (when `realtime` is `false`). 
 `stopOn`              | *String* or *Array of strings* indicating an action or a list of actions, which should stop remote monitoring. 
 `sendOn`              | *String* or *Array of strings* indicating an action or a list of actions, which should trigger sending the history to the monitor (without starting it). *Note*: when using it, add a `fetch` polyfill if needed.
-`sendTo`              | *String* url of the monitor to send the history when `sendOn` is triggered. By default is `${secure ? 'https' : 'http'}://${host}:${port}`.
+`sendTo`              | *String* url of the monitor to send the history when `sendOn` is triggered. By default is `${secure ? 'https' : 'http'}://${hostname}:${port}`.
 `id`                  | *String* to identify the instance when sending the history triggered by `sendOn`. You can use, for example, user id here, to know who sent the data.
 
 All parameters are optional. You have to provide at least `port` property to use `localhost` instead of `remotedev.io` server.

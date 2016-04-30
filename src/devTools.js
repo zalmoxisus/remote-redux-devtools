@@ -99,7 +99,7 @@ function init(options) {
   if (options.port) {
     socketOptions = {
       port: options.port,
-      host: options.hostname || 'localhost',
+      hostname: options.hostname || 'localhost',
       secure: options.secure
     };
   } else socketOptions = defaultSocketOptions;
@@ -109,7 +109,7 @@ function init(options) {
   sendOn = str2array(options.sendOn);
   if (sendOn) {
     sendTo = options.sendTo ||
-      `${socketOptions.secure ? 'https' : 'http'}://${socketOptions.host}:${socketOptions.port}`;
+      `${socketOptions.secure ? 'https' : 'http'}://${socketOptions.hostname}:${socketOptions.port}`;
     instanceId = options.id;
   }
 }
