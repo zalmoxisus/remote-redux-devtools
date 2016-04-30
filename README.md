@@ -61,13 +61,16 @@ Name                  | Description
 -------------         | -------------
 `name`                | *String* representing the instance name to be shown on the remote monitor.
 `realtime`            | *Boolean* specifies whether to allow remote monitoring. By default is `process.env.NODE_ENV === 'development'`. 
-`hostname`            | *String* used for [`remotedev-server`](https://github.com/zalmoxisus/remotedev-server). If `port` is specified, default value is `localhost`.
-`port`                | *Number* used for [`remotedev-server`](https://github.com/zalmoxisus/remotedev-server). Local host's port.
-`secure`              | *Boolean* specifies whether to use `https` protocol.
+`hostname`            | *String* used to specify host for [`remotedev-server`](https://github.com/zalmoxisus/remotedev-server). If `port` is specified, default value is `localhost`.
+`port`                | *Number* used to specify host's port for [`remotedev-server`](https://github.com/zalmoxisus/remotedev-server).
+`secure`              | *Boolean* specifies whether to use `https` protocol for [`remotedev-server`](https://github.com/zalmoxisus/remotedev-server).
 `filters`             | *Map of arrays* named `whitelist` or `blacklist` to filter action types.
 `maxAge`              | *Number* of maximum allowed actions to be stored on the history tree, the oldest actions are removed once maxAge is reached. Default is `30`.
 `startOn`             | *String* or *Array of strings* indicating an action or a list of actions, which should start remote monitoring (when `realtime` is `false`). 
 `stopOn`              | *String* or *Array of strings* indicating an action or a list of actions, which should stop remote monitoring. 
+`sendOn`              | *String* or *Array of strings* indicating an action or a list of actions, which should trigger sending the history to the monitor (without starting it). *Note*: when using it, add a `fetch` polyfill if needed.
+`sendTo`              | *String* url of the monitor to send the history when `sendOn` is triggered. By default is `${secure ? 'https' : 'http'}://${host}:${port}`.
+`id`                  | *String* to identify the instance when sending the history triggered by `sendOn`. You can use, for example, user id here, to know who sent the data.
 
 All parameters are optional. You have to provide at least `port` property to use `localhost` instead of `remotedev.io` server.
 

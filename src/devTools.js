@@ -7,6 +7,7 @@ const monitorActions = [ // To be skipped for relaying actions
   'TOGGLE_ACTION', 'SWEEP', 'IMPORT_STATE', 'SET_ACTIONS_ACTIVE'
 ];
 
+let instanceId;
 let instanceName;
 let socketOptions;
 let socket;
@@ -19,6 +20,8 @@ let isMonitored;
 let started;
 let startOn;
 let stopOn;
+let sendOn;
+let sendTo;
 
 function isFiltered(action) {
   if (!action || !action.action || !action.action.type) return false;
@@ -103,6 +106,12 @@ function init(options) {
 
   startOn = str2array(options.startOn);
   stopOn = str2array(options.stopOn);
+  sendOn = str2array(options.sendOn);
+  if (sendOn) {
+    sendTo = options.sendTo ||
+      `${socketOptions.secure ? 'https' : 'http'}://${socketOptions.host}:${socketOptions.port}`;
+    instanceId = options.id;
+  }
 }
 
 function start() {
@@ -135,10 +144,31 @@ function stop() {
   }
 }
 
+function send() {
+  if (!instanceId) instanceId = socket && socket.id || Math.random().toString(36).substr(2);
+  try {
+    fetch(sendTo, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        type: 'STATE',
+        id: instanceId,
+        name: instanceName,
+        payload: stringify(filterStagedActions(store.liftedStore.getState()))
+      })
+    });
+  } catch (err) {
+    console.warn(err);
+  }
+}
+
 function monitorReducer(state = {}, action) {
   if (action.action) {
     if (startOn && !started && startOn.indexOf(action.action.type) !== -1) start();
     else if (stopOn && started && stopOn.indexOf(action.action.type) !== -1) stop();
+    else if (sendOn && !started && sendOn.indexOf(action.action.type) !== -1) send();
   }
   lastAction = action.type;
   return state;
