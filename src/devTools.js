@@ -96,7 +96,8 @@ function init(options) {
   if (options.port) {
     socketOptions = {
       port: options.port,
-      host: options.hostname || 'localhost'
+      host: options.hostname || 'localhost',
+      secure: options.secure
     };
   } else socketOptions = defaultSocketOptions;
 
