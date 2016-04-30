@@ -11,7 +11,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-  return bindActionCreators({ ...CounterActions, ...MonitorActions}, dispatch);
+  return bindActionCreators({ ...CounterActions, ...MonitorActions }, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Counter);

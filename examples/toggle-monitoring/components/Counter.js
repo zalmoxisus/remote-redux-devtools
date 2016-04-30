@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 
 class Counter extends Component {
   render() {
-    const { startMonitoring, stopMonitoring, increment, decrement, counter } = this.props;
+    const { startMonitoring, stopMonitoring, sendToMonitor, increment, decrement, counter } = this.props;
     return (
       <p>
         Clicked: {counter} times
@@ -14,6 +14,8 @@ class Counter extends Component {
         <button onClick={startMonitoring}>Start monitoring</button>
         {' '}
         <button onClick={stopMonitoring}>Stop monitoring</button>
+        {' '}
+        <button onClick={sendToMonitor}>Send to the monitor</button>
       </p>
     );
   }
@@ -22,6 +24,7 @@ class Counter extends Component {
 Counter.propTypes = {
   startMonitoring: PropTypes.func.isRequired,
   stopMonitoring: PropTypes.func.isRequired,
+  sendToMonitor: PropTypes.func.isRequired,
   increment: PropTypes.func.isRequired,
   decrement: PropTypes.func.isRequired,
   counter: PropTypes.number.isRequired
