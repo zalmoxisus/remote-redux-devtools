@@ -158,6 +158,8 @@ function send() {
         name: instanceName,
         payload: stringify(filterStagedActions(store.liftedStore.getState()))
       })
+    }).catch(function (err) {
+      console.warn(err);
     });
   } catch (err) {
     console.warn(err);
