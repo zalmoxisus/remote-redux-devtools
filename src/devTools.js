@@ -166,11 +166,15 @@ function send() {
   }
 }
 
+function async(fn) {
+  setTimeout(fn, 0);
+}
+
 function monitorReducer(state = {}, action) {
   if (action.action) {
-    if (startOn && !started && startOn.indexOf(action.action.type) !== -1) start();
-    else if (stopOn && started && stopOn.indexOf(action.action.type) !== -1) stop();
-    else if (sendOn && !started && sendOn.indexOf(action.action.type) !== -1) send();
+    if (startOn && !started && startOn.indexOf(action.action.type) !== -1) async(start);
+    else if (stopOn && started && stopOn.indexOf(action.action.type) !== -1) async(stop);
+    else if (sendOn && !started && sendOn.indexOf(action.action.type) !== -1) async(send);
   }
   lastAction = action.type;
   return state;
