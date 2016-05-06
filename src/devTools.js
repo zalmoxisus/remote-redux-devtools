@@ -31,22 +31,6 @@ function isFiltered(action) {
   );
 }
 
-function relay(type, state, action, nextActionId) {
-  if (filters && isFiltered(action)) return;
-  const message = {
-    type,
-    id: socket.id,
-    name: instanceName
-  };
-  if (state) message.payload = stringify(state);
-  if (action) {
-    message.action = stringify(action);
-    message.isExcess = isExcess;
-  }
-  if (nextActionId) message.nextActionId = stringify(nextActionId);
-  socket.emit(socket.id ? 'log' : 'log-noid', message);
-}
-
 function filterStagedActions(state) {
   if (!filters) return state;
 
@@ -64,6 +48,44 @@ function filterStagedActions(state) {
     stagedActionIds: filteredStagedActionIds,
     computedStates: filteredComputedStates
   };
+}
+
+function send() {
+  if (!instanceId) instanceId = socket && socket.id || Math.random().toString(36).substr(2);
+  try {
+    fetch(sendTo, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        type: 'STATE',
+        id: instanceId,
+        name: instanceName,
+        payload: stringify(filterStagedActions(store.liftedStore.getState()))
+      })
+    }).catch(function (err) {
+      console.warn(err);
+    });
+  } catch (err) {
+    console.warn(err);
+  }
+}
+
+function relay(type, state, action, nextActionId) {
+  if (filters && isFiltered(action)) return;
+  const message = {
+    type,
+    id: socket.id,
+    name: instanceName
+  };
+  if (state) message.payload = stringify(state);
+  if (action) {
+    message.action = stringify(action);
+    message.isExcess = isExcess;
+  }
+  if (nextActionId) message.nextActionId = stringify(nextActionId);
+  socket.emit(socket.id ? 'log' : 'log-noid', message);
 }
 
 function handleMessages(message) {
@@ -141,28 +163,6 @@ function stop() {
   if (socket) {
     socket.off();
     socket.disconnect();
-  }
-}
-
-function send() {
-  if (!instanceId) instanceId = socket && socket.id || Math.random().toString(36).substr(2);
-  try {
-    fetch(sendTo, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        type: 'STATE',
-        id: instanceId,
-        name: instanceName,
-        payload: stringify(filterStagedActions(store.liftedStore.getState()))
-      })
-    }).catch(function (err) {
-      console.warn(err);
-    });
-  } catch (err) {
-    console.warn(err);
   }
 }
 
