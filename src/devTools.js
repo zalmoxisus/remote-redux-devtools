@@ -3,6 +3,8 @@ import socketCluster from 'socketcluster-client';
 import configureStore from './configureStore';
 import { defaultSocketOptions } from './constants';
 
+const ERROR = '@@remotedev/ERROR';
+
 const monitorActions = [ // To be skipped for relaying actions
   '@@redux/INIT', 'TOGGLE_ACTION', 'SWEEP', 'IMPORT_STATE', 'SET_ACTIONS_ACTIVE'
 ];
@@ -110,15 +112,23 @@ function handleMessages(message) {
   }
 }
 
+function sendError(errorAction) {
+  store.dispatch(errorAction);
+  if (!started) send();
+}
+
 function catchErrors() {
   if (typeof window === 'object' && typeof window.onerror === 'object') {
     window.onerror = function (msg, url, lineNo, columnNo, error) {
-      const errorAction = { type: '@@remotedev/ERROR', msg, url, lineNo, columnNo };
+      const errorAction = { type: ERROR, msg, url, lineNo, columnNo };
       if (error && error.stack) errorAction.stack = error.stack;
-      store.dispatch(errorAction);
-      if (!started) send();
+      sendError(errorAction);
       return false;
     };
+  } else if (typeof global !== 'undefined' && global.ErrorUtils) {
+    global.ErrorUtils.setGlobalHandler((error, isFatal) => {
+      sendError({ type: ERROR, error, isFatal });
+    });
   }
 }
 
