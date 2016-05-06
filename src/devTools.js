@@ -21,6 +21,7 @@ let started;
 let startOn;
 let stopOn;
 let sendOn;
+let sendOnError;
 let sendTo;
 
 function isFiltered(action) {
@@ -109,6 +110,18 @@ function handleMessages(message) {
   }
 }
 
+function catchErrors() {
+  if (typeof window === 'object' && typeof window.onerror === 'object') {
+    window.onerror = function (msg, url, lineNo, columnNo, error) {
+      const errorAction = { type: '@@remotedev/ERROR', msg, url, lineNo, columnNo };
+      if (error && error.stack) errorAction.stack = error.stack;
+      store.dispatch(errorAction);
+      if (!started) send();
+      return false;
+    };
+  }
+}
+
 function str2array(str) {
   return typeof str === 'string' ? [str] : str && str.length;
 }
@@ -129,11 +142,13 @@ function init(options) {
   startOn = str2array(options.startOn);
   stopOn = str2array(options.stopOn);
   sendOn = str2array(options.sendOn);
-  if (sendOn) {
+  sendOnError = options.sendOnError;
+  if (sendOn || sendOnError) {
     sendTo = options.sendTo ||
       `${socketOptions.secure ? 'https' : 'http'}://${socketOptions.hostname}:${socketOptions.port}`;
     instanceId = options.id;
   }
+  if (sendOnError === 1) catchErrors();
 }
 
 function start() {
@@ -170,20 +185,33 @@ function async(fn) {
   setTimeout(fn, 0);
 }
 
+function checkForReducerErrors(liftedState = store.liftedStore.getState()) {
+  if (liftedState.computedStates[liftedState.currentStateIndex].error) {
+    if (started) relay('STATE', filterStagedActions(liftedState));
+    else send();
+    return true;
+  }
+  return false;
+}
+
 function monitorReducer(state = {}, action) {
-  if (action.action) {
+  lastAction = action.type;
+  if (!started && sendOnError === 2 && store.liftedStore) async(checkForReducerErrors);
+  else if (action.action) {
     if (startOn && !started && startOn.indexOf(action.action.type) !== -1) async(start);
     else if (stopOn && started && stopOn.indexOf(action.action.type) !== -1) async(stop);
     else if (sendOn && !started && sendOn.indexOf(action.action.type) !== -1) async(send);
   }
-  lastAction = action.type;
   return state;
 }
 
 function handleChange(state, liftedState, maxAge) {
+  if (checkForReducerErrors(liftedState)) return;
+
   const nextActionId = liftedState.nextActionId;
   const liftedAction = liftedState.actionsById[nextActionId - 1];
   const action = liftedAction.action;
+
   if (action.type === '@@INIT') {
     relay('INIT', state, { timestamp: Date.now() });
   } else if (monitorActions.indexOf(lastAction) === -1) {
