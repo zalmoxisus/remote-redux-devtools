@@ -4,7 +4,7 @@ import configureStore from './configureStore';
 import { defaultSocketOptions } from './constants';
 
 const monitorActions = [ // To be skipped for relaying actions
-  'TOGGLE_ACTION', 'SWEEP', 'IMPORT_STATE', 'SET_ACTIONS_ACTIVE'
+  '@@redux/INIT', 'TOGGLE_ACTION', 'SWEEP', 'IMPORT_STATE', 'SET_ACTIONS_ACTIVE'
 ];
 
 let instanceId;
