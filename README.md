@@ -69,7 +69,7 @@ Name                  | Description
 `startOn`             | *String* or *Array of strings* indicating an action or a list of actions, which should start remote monitoring (when `realtime` is `false`). 
 `stopOn`              | *String* or *Array of strings* indicating an action or a list of actions, which should stop remote monitoring. 
 `sendOn`              | *String* or *Array of strings* indicating an action or a list of actions, which should trigger sending the history to the monitor (without starting it). *Note*: when using it, add a `fetch` polyfill if needed.
-`sendOnError`         | *Numeric* code: `0` - disabled (default), `1` - send all uncaught exception messages (for browser and React Native), `2` - send only reducers error messages.
+`sendOnError`         | *Numeric* code: `0` - disabled (default), `1` - send all uncaught exception messages, `2` - send only reducers error messages.
 `sendTo`              | *String* url of the monitor to send the history when `sendOn` is triggered. By default is `${secure ? 'https' : 'http'}://${hostname}:${port}`.
 `id`                  | *String* to identify the instance when sending the history triggered by `sendOn`. You can use, for example, user id here, to know who sent the data.
 

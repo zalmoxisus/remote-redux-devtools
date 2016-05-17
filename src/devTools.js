@@ -119,8 +119,8 @@ function sendError(errorAction) {
 
 function catchErrors() {
   if (typeof window === 'object' && typeof window.onerror === 'object') {
-    window.onerror = function (msg, url, lineNo, columnNo, error) {
-      const errorAction = { type: ERROR, msg, url, lineNo, columnNo };
+    window.onerror = function (message, url, lineNo, columnNo, error) {
+      const errorAction = { type: ERROR, message, url, lineNo, columnNo };
       if (error && error.stack) errorAction.stack = error.stack;
       sendError(errorAction);
       return false;
@@ -129,6 +129,23 @@ function catchErrors() {
     global.ErrorUtils.setGlobalHandler((error, isFatal) => {
       sendError({ type: ERROR, error, isFatal });
     });
+  }
+
+  if (typeof console === 'object' && typeof console.error === 'function' && !console.beforeRemotedev) {
+    console.beforeRemotedev = console.error.bind(console);
+    console.error = function () {
+      let errorAction = { type: ERROR };
+      const error = arguments[0];
+      errorAction.message = error.message ? error.message : error;
+      if (error.sourceURL) {
+        errorAction = {
+          ...errorAction, sourceURL: error.sourceURL, line: error.line, column: error.column
+        };
+      }
+      if (error.stack) errorAction.stack = error.stack;
+      sendError(errorAction);
+      console.beforeRemotedev.apply(null, arguments);
+    };
   }
 }
 
