@@ -256,7 +256,7 @@ export default function devTools(options = {}) {
   init(options);
   const realtime = typeof options.realtime === 'undefined'
     ? process.env.NODE_ENV === 'development' : options.realtime;
-  if (!realtime && !startOn) return f => f;
+  if (!realtime && !(startOn || sendOn || sendOnError)) return f => f;
 
   const maxAge = options.maxAge || 30;
   return (next) => {
