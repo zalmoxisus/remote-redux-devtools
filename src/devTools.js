@@ -112,9 +112,15 @@ function handleMessages(message) {
   }
 }
 
+function async(fn) {
+  setTimeout(fn, 0);
+}
+
 function sendError(errorAction) {
-  store.dispatch(errorAction);
-  if (!started) send();
+  async(() => {
+    store.dispatch(errorAction);
+    if (!started) send();
+  });
 }
 
 function catchErrors() {
@@ -206,10 +212,6 @@ function stop() {
     socket.off();
     socket.disconnect();
   }
-}
-
-function async(fn) {
-  setTimeout(fn, 0);
 }
 
 function checkForReducerErrors(liftedState = store.liftedStore.getState()) {
