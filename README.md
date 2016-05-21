@@ -35,20 +35,17 @@ export default function configureStore(initialState) {
 
 ### Remote monitoring
 
-Use one of [our monitor apps](https://github.com/zalmoxisus/remotedev-app) to inspect and redo actions:
-- [web](http://remotedev.io/)
-- [chrome app](https://chrome.google.com/webstore/detail/remotedev/faicmgpfiaijcedapokpbdejaodbelph) (recommended)
-- [electron app](https://github.com/zalmoxisus/remote-redux-devtools/tree/master/install).
-
-The source code is [here](https://github.com/zalmoxisus/remotedev-app).
-
-It is also included in the following projects, which you can use:
-
+Use one of [our monitor apps](https://github.com/zalmoxisus/remotedev-app) to inspect and dispatch actions:
+* [web](http://remotedev.io/local)
 * [redux-devtools-extension](https://github.com/zalmoxisus/redux-devtools-extension) - Click "Remote" button (or press [`Cmd+Ctrl+Arrow up`](https://github.com/zalmoxisus/redux-devtools-extension#keyboard-shortcuts)) to open remote monitoring.
-* [remotedev-extension](https://github.com/jhen0409/remotedev-extension) - Used in Electron/Browser DevTools.
+* [remotedev-extension](https://github.com/jhen0409/remotedev-extension) - Used in Electron/Browser DevTools panel.
+* [chrome app](https://chrome.google.com/webstore/detail/remotedev/faicmgpfiaijcedapokpbdejaodbelph).
+* [electron app](https://github.com/zalmoxisus/remotedev-app).
 * [remote-redux-devtools-on-debugger](https://github.com/jhen0409/remote-redux-devtools-on-debugger) - Used in React Native debugger as a dock monitor.
 * [atom-redux-devtools](https://github.com/zalmoxisus/atom-redux-devtools) - Used in Atom editor.
 * [redux-dispatch-cli](https://github.com/jhen0409/redux-dispatch-cli) - A CLI tool for Redux remote dispatch.
+
+Use [remotedev-app](https://github.com/zalmoxisus/remotedev-app) to create your own monitor app.
 
 ### Communicate via local server
 
