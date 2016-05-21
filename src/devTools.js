@@ -25,6 +25,7 @@ let stopOn;
 let sendOn;
 let sendOnError;
 let sendTo;
+let lastErrorMsg;
 
 function isFiltered(action) {
   if (!action || !action.action || !action.action.type) return false;
@@ -117,6 +118,10 @@ function async(fn) {
 }
 
 function sendError(errorAction) {
+  // Prevent flooding
+  if (errorAction.message && errorAction.message === lastErrorMsg) return;
+  lastErrorMsg = errorAction.message;
+
   async(() => {
     store.dispatch(errorAction);
     if (!started) send();
