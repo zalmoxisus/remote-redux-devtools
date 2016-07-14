@@ -2,6 +2,7 @@ import { stringify, parse } from 'jsan';
 import socketCluster from 'socketcluster-client';
 import configureStore from './configureStore';
 import { defaultSocketOptions } from './constants';
+import { getHostForRN } from './utils/reactNative';
 
 const ERROR = '@@remotedev/ERROR';
 
@@ -258,7 +259,10 @@ function handleChange(state, liftedState, maxAge) {
 }
 
 export default function devTools(options = {}) {
-  init(options);
+  init({
+    ...options,
+    hostname: getHostForRN(options.hostname)
+  });
   const realtime = typeof options.realtime === 'undefined'
     ? process.env.NODE_ENV === 'development' : options.realtime;
   if (!realtime && !(startOn || sendOn || sendOnError)) return f => f;
