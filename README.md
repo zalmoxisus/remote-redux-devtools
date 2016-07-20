@@ -40,7 +40,7 @@ Use one of [our monitor apps](https://github.com/zalmoxisus/remotedev-app) to in
 * [redux-devtools-extension](https://github.com/zalmoxisus/redux-devtools-extension) - Click "Remote" button (or press [`Cmd+Ctrl+Arrow up`](https://github.com/zalmoxisus/redux-devtools-extension#keyboard-shortcuts)) to open remote monitoring.
 * [remotedev-extension](https://github.com/jhen0409/remotedev-extension) - Used in Electron/Browser DevTools panel.
 * [chrome app](https://chrome.google.com/webstore/detail/remotedev/faicmgpfiaijcedapokpbdejaodbelph).
-* [electron app](https://github.com/zalmoxisus/remotedev-app).
+* [react-native-debugger](https://github.com/jhen0409/react-native-debugger).
 * [remote-redux-devtools-on-debugger](https://github.com/jhen0409/remote-redux-devtools-on-debugger) - Used in React Native debugger as a dock monitor.
 * [atom-redux-devtools](https://github.com/zalmoxisus/atom-redux-devtools) - Used in Atom editor.
 * [redux-dispatch-cli](https://github.com/jhen0409/redux-dispatch-cli) - A CLI tool for Redux remote dispatch.
