@@ -84,11 +84,13 @@ function relay(type, state, action, nextActionId) {
     name: instanceName
   };
   if (state) message.payload = stringify(state);
-  if (action) {
+  if (type === 'ACTION') {
     message.action = stringify(action);
     message.isExcess = isExcess;
+    message.nextActionId = nextActionId;
+  } else if (action) {
+    message.action = action;
   }
-  if (nextActionId) message.nextActionId = stringify(nextActionId);
   socket.emit(socket.id ? 'log' : 'log-noid', message);
 }
 
