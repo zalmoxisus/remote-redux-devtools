@@ -21,7 +21,7 @@
     "react": "^0.14.0",
     "react-dom": "^0.14.0",
     "react-redux": "^4.0.0",
-    "redux": "^3.0.0"
+    "redux": "^3.5.2"
   },
   "devDependencies": {
     "babel-core": "^6.3.15",
@@ -41,7 +41,7 @@
     "react-transform-hmr": "^1.0.0",
     "style-loader": "^0.12.3",
     "todomvc-app-css": "^2.0.1",
-    "webpack": "^1.9.11",
+    "webpack": "^1.13.1",
     "webpack-dev-middleware": "^1.2.0",
     "webpack-hot-middleware": "^2.2.0"
   }

@@ -6,16 +6,17 @@ import reducer from '../reducers';
 import { START_MONITORING, STOP_MONITORING, SEND_TO_MONITOR } from '../actions/monitoring';
 
 export default function configureStore(initialState) {
-  const finalCreateStore = compose(
+  const enhancer = compose(
     applyMiddleware(invariant(), thunk),
     devTools({
       realtime: false,
       startOn: START_MONITORING, stopOn: STOP_MONITORING,
-      sendOn: SEND_TO_MONITOR
+      sendOn: SEND_TO_MONITOR, sendOnError: 1,
+      maxAge: 30
     })
-  )(createStore);
+  );
 
-  const store = finalCreateStore(reducer, initialState);
+  const store = createStore(reducer, initialState, enhancer);
 
   if (module.hot) {
     // Enable Webpack hot module replacement for reducers
