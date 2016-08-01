@@ -55,6 +55,10 @@ function filterStagedActions(state) {
   };
 }
 
+function getLiftedState() {
+  return filterStagedActions(store.liftedStore.getState());
+}
+
 function send() {
   if (!instanceId) instanceId = socket && socket.id || Math.random().toString(36).substr(2);
   try {
@@ -67,7 +71,7 @@ function send() {
         type: 'STATE',
         id: instanceId,
         name: instanceName,
-        payload: stringify(filterStagedActions(store.liftedStore.getState()))
+        payload: stringify(getLiftedState())
       })
     }).catch(function (err) {
       console.warn(err);
@@ -102,8 +106,8 @@ function handleMessages(message) {
     store.liftedStore.dispatch({
       type: 'IMPORT_STATE', nextLiftedState: parse(message.state)
     });
-  } if (message.type === 'UPDATE' || message.type === 'IMPORT' || message.type === 'START') {
-    relay('STATE', filterStagedActions(store.liftedStore.getState()));
+  } if (message.type === 'UPDATE' || message.type === 'IMPORT') {
+    relay('STATE', getLiftedState());
   } if (message.type === 'START') {
     isMonitored = true;
   } else if (message.type === 'STOP' || message.type === 'DISCONNECTED') {
@@ -206,7 +210,7 @@ function start() {
     channel.watch(handleMessages);
     socket.on(channelName, handleMessages);
   });
-  relay('STATE', store.liftedStore.getState());
+  relay('START');
 }
 
 function stop() {
