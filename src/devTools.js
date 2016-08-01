@@ -3,6 +3,7 @@ import socketCluster from 'socketcluster-client';
 import configureStore from './configureStore';
 import { defaultSocketOptions } from './constants';
 import { getHostForRN } from './utils/reactNative';
+import { evalAction, getActionsArray } from 'remotedev-utils';
 
 const ERROR = '@@remotedev/ERROR';
 
@@ -27,6 +28,7 @@ let sendOn;
 let sendOnError;
 let sendTo;
 let lastErrorMsg;
+let actionCreators;
 
 function isFiltered(action) {
   if (!action || !action.action || !action.action.type) return false;
@@ -88,7 +90,7 @@ function relay(type, state, action, nextActionId) {
     id: socket.id,
     name: instanceName
   };
-  if (state) message.payload = stringify(state);
+  if (state) message.payload = type === 'ERROR' ? state : stringify(state);
   if (type === 'ACTION') {
     message.action = stringify(action);
     message.isExcess = isExcess;
@@ -97,6 +99,15 @@ function relay(type, state, action, nextActionId) {
     message.action = action;
   }
   socket.emit(socket.id ? 'log' : 'log-noid', message);
+}
+
+function dispatchRemotely(action) {
+  try {
+    const result = evalAction(action, actionCreators);
+    store.dispatch(result);
+  } catch (e) {
+    relay('ERROR', e.message);
+  }
 }
 
 function handleMessages(message) {
@@ -110,11 +121,13 @@ function handleMessages(message) {
     relay('STATE', getLiftedState());
   } if (message.type === 'START') {
     isMonitored = true;
+    if (typeof actionCreators === 'function') actionCreators = actionCreators();
+    relay('STATE', getLiftedState(), actionCreators);
   } else if (message.type === 'STOP' || message.type === 'DISCONNECTED') {
     isMonitored = false;
     relay('STOP');
   } else if (message.type === 'ACTION') {
-    store.dispatch(message.action);
+    dispatchRemotely(message.action);
   } else if (message.type === 'DISPATCH') {
     store.liftedStore.dispatch(message.action);
   }
@@ -194,6 +207,8 @@ function init(options) {
     instanceId = options.id;
   }
   if (sendOnError === 1) catchErrors();
+
+  if (options.actionCreators) actionCreators = () => getActionsArray(options.actionCreators);
 }
 
 function start() {
