@@ -29,7 +29,11 @@ export default function configureStore(initialState) {
     devTools()
   );
   // Note: passing enhancer as last argument requires redux@>=3.1.0
-  return createStore(reducer, initialState, enhancer);
+  const store = createStore(reducer, initialState, enhancer);
+  // devTools will ignores other enhancers & middlewares
+  // update the store after creating / changing:
+  devTools.updateStore(store);
+  return store;
 }
 ```
 
@@ -77,15 +81,19 @@ Example:
 ```js
 export default function configureStore(initialState) {
   // Note: passing enhancer as last argument requires redux@>=3.1.0
-  return createStore(
+  const store = createStore(
     rootReducer,
     initialState,
     devTools({
       name: 'Android app', realtime: true,
       hostname: 'localhost', port: 8000,
       maxAge: 30, filters: { blacklist: ['EFFECT_RESOLVED'] }
-      })
+    })
   );
+  // devTools will ignores other enhancers & middlewares
+  // update the store after creating / changing:
+  devTools.updateStore(store);
+  return store;
 }
 ```
 

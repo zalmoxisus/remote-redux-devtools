@@ -303,3 +303,7 @@ export default function devTools(options = {}) {
     };
   };
 }
+
+devTools.updateStore = (newStore) => {
+  store = newStore;
+};
