@@ -30,8 +30,8 @@ export default function configureStore(initialState) {
   );
   // Note: passing enhancer as last argument requires redux@>=3.1.0
   const store = createStore(reducer, initialState, enhancer);
-  // devTools will ignores other enhancers & middlewares
-  // update the store after creating / changing:
+  // If you have other enhancers & middlewares
+  // update the store after creating / changing to allow devTools to use them
   devTools.updateStore(store);
   return store;
 }
@@ -90,8 +90,8 @@ export default function configureStore(initialState) {
       maxAge: 30, filters: { blacklist: ['EFFECT_RESOLVED'] }
     })
   );
-  // devTools will ignores other enhancers & middlewares
-  // update the store after creating / changing:
+  // If you have other enhancers & middlewares
+  // update the store after creating / changing to allow devTools to use them
   devTools.updateStore(store);
   return store;
 }
