@@ -11,6 +11,6 @@
     "redux": "^3.5.2"
   },
   "devDependencies": {
-    "remote-redux-devtools": "^0.4.1"
+    "remote-redux-devtools": "^0.4.2"
   }
 }
