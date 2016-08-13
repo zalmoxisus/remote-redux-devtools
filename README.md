@@ -37,6 +37,17 @@ export default function configureStore(initialState) {
 }
 ```
 
+#### Important
+
+In order not to allow it in production by default, the enhancer will have effect only when `process.env.NODE_ENV === 'development'`. In case you don't set `NODE_ENV` or want to use it in production, set `realtime` parameter to `true`:
+
+```js
+const enhancer = compose(
+  applyMiddleware(thunk),
+  devTools({ realtime: true })
+);
+```
+
 ### Monitoring
 
 Use one of our monitor apps to inspect and dispatch actions:
