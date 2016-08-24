@@ -1,7 +1,7 @@
 export const defaultSocketOptions = {
-  secure: false,
+  secure: true,
   hostname: 'remotedev.io',
-  port: 80,
+  port: 443,
   autoReconnect: true,
   autoReconnectOptions: {
     randomness: 60000
