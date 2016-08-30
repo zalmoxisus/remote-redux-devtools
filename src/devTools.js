@@ -30,8 +30,8 @@ let sendOnError;
 let sendTo;
 let lastErrorMsg;
 let actionCreators;
-let statesFilter;
-let actionsFilter;
+let stateSanitizer;
+let actionSanitizer;
 
 function getLiftedState() {
   return filterStagedActions(store.liftedStore.getState(), filters);
@@ -68,11 +68,11 @@ function relay(type, state, action, nextActionId) {
   };
   if (state) {
     message.payload = type === 'ERROR' ? state :
-      stringify(filterState(state, type, filters, statesFilter, actionsFilter, nextActionId));
+      stringify(filterState(state, type, filters, stateSanitizer, actionSanitizer, nextActionId));
   }
   if (type === 'ACTION') {
     message.action = stringify(
-      !actionsFilter ? action : actionsFilter(action.action, nextActionId - 1)
+      !actionSanitizer ? action : actionSanitizer(action.action, nextActionId - 1)
     );
     message.isExcess = isExcess;
     message.nextActionId = nextActionId;
@@ -190,8 +190,8 @@ function init(options) {
   if (sendOnError === 1) catchErrors();
 
   if (options.actionCreators) actionCreators = () => getActionsArray(options.actionCreators);
-  statesFilter = options.statesFilter;
-  actionsFilter = options.actionsFilter;
+  stateSanitizer = options.stateSanitizer;
+  actionSanitizer = options.actionSanitizer;
 }
 
 function start() {

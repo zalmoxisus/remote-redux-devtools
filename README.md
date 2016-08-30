@@ -84,8 +84,8 @@ Name                  | Description
 `secure`              | *Boolean* specifies whether to use `https` protocol for [`remotedev-server`](https://github.com/zalmoxisus/remotedev-server).
 `maxAge`              | *Number* of maximum allowed actions to be stored on the history tree, the oldest actions are removed once maxAge is reached. Default is `30`.
 `filters`             | *Map of arrays* named `whitelist` or `blacklist` to filter action types.  See the example bellow.
-`actionsFilter`       | *Function* which takes action object and id number as arguments, and should return action object back. See the example bellow.
-`statesFilter`        | *Function* which takes state object and index as arguments, and should return state object back. See the example bellow.
+`actionSanitizer`     | *Function* which takes action object and id number as arguments, and should return action object back. See the example bellow.
+`stateSanitizer`      | *Function* which takes state object and index as arguments, and should return state object back. See the example bellow.
 `startOn`             | *String* or *Array of strings* indicating an action or a list of actions, which should start remote monitoring (when `realtime` is `false`). 
 `stopOn`              | *String* or *Array of strings* indicating an action or a list of actions, which should stop remote monitoring. 
 `sendOn`              | *String* or *Array of strings* indicating an action or a list of actions, which should trigger sending the history to the monitor (without starting it). *Note*: when using it, add a `fetch` polyfill if needed.
@@ -107,11 +107,11 @@ export default function configureStore(initialState) {
       name: 'Android app', realtime: true,
       hostname: 'localhost', port: 8000,
       maxAge: 30, filters: { blacklist: ['EFFECT_RESOLVED'] },
-      actionsFilter: (action) => (
+      actionSanitizer: (action) => (
        action.type === 'FILE_DOWNLOAD_SUCCESS' && action.data ?
        { ...action, data: '<<LONG_BLOB>>' } : action
       ),
-      statesFilter: (state) => state.data ? { ...state, data: '<<LONG_BLOB>>' } : state
+      stateSanitizer: (state) => state.data ? { ...state, data: '<<LONG_BLOB>>' } : state
     })
   );
   // If you have other enhancers & middlewares
