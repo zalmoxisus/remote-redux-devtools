@@ -4,6 +4,7 @@ import configureStore from './configureStore';
 import { defaultSocketOptions } from './constants';
 import { getHostForRN } from './utils/reactNative';
 import { evalAction, getActionsArray } from 'remotedev-utils';
+import { isFiltered, filterStagedActions, filterState } from 'remotedev-utils/lib/filters';
 
 const ERROR = '@@remotedev/ERROR';
 
@@ -29,36 +30,11 @@ let sendOnError;
 let sendTo;
 let lastErrorMsg;
 let actionCreators;
-
-function isFiltered(action) {
-  if (!action || !action.action || !action.action.type) return false;
-  return (
-    filters.whitelist && !action.action.type.match(filters.whitelist.join('|')) ||
-    filters.blacklist && action.action.type.match(filters.blacklist.join('|'))
-  );
-}
-
-function filterStagedActions(state) {
-  if (!filters) return state;
-
-  const filteredStagedActionIds = [];
-  const filteredComputedStates = [];
-
-  state.stagedActionIds.forEach((id, idx) => {
-    if (!isFiltered(state.actionsById[id])) {
-      filteredStagedActionIds.push(id);
-      filteredComputedStates.push(state.computedStates[idx]);
-    }
-  });
-
-  return { ...state,
-    stagedActionIds: filteredStagedActionIds,
-    computedStates: filteredComputedStates
-  };
-}
+let statesFilter;
+let actionsFilter;
 
 function getLiftedState() {
-  return filterStagedActions(store.liftedStore.getState());
+  return filterStagedActions(store.liftedStore.getState(), filters);
 }
 
 function send() {
@@ -84,15 +60,20 @@ function send() {
 }
 
 function relay(type, state, action, nextActionId) {
-  if (filters && isFiltered(action)) return;
+  if (isFiltered(action, filters)) return;
   const message = {
     type,
     id: socket.id,
     name: instanceName
   };
-  if (state) message.payload = type === 'ERROR' ? state : stringify(state);
+  if (state) {
+    message.payload = type === 'ERROR' ? state :
+      stringify(filterState(state, type, filters, statesFilter, actionsFilter, nextActionId));
+  }
   if (type === 'ACTION') {
-    message.action = stringify(action);
+    message.action = stringify(
+      !actionsFilter ? action : actionsFilter(action.action, nextActionId - 1)
+    );
     message.isExcess = isExcess;
     message.nextActionId = nextActionId;
   } else if (action) {
@@ -209,6 +190,8 @@ function init(options) {
   if (sendOnError === 1) catchErrors();
 
   if (options.actionCreators) actionCreators = () => getActionsArray(options.actionCreators);
+  statesFilter = options.statesFilter;
+  actionsFilter = options.actionsFilter;
 }
 
 function start() {
@@ -243,7 +226,7 @@ function stop() {
 
 function checkForReducerErrors(liftedState = store.liftedStore.getState()) {
   if (liftedState.computedStates[liftedState.currentStateIndex].error) {
-    if (started) relay('STATE', filterStagedActions(liftedState));
+    if (started) relay('STATE', filterStagedActions(liftedState, filters));
     else send();
     return true;
   }
@@ -275,7 +258,7 @@ function handleChange(state, liftedState, maxAge) {
     relay('ACTION', state, liftedAction, nextActionId);
     if (!isExcess && maxAge) isExcess = liftedState.stagedActionIds.length >= maxAge;
   } else {
-    relay('STATE', filterStagedActions(liftedState));
+    relay('STATE', filterStagedActions(liftedState, filters));
   }
 }
 
