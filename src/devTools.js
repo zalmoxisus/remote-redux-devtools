@@ -161,31 +161,40 @@ function init(options) {
   actionSanitizer = options.actionSanitizer;
 }
 
-function start() {
-  if (started) return;
+function login() {
+  socket.emit('login', 'master', (err, channelName) => {
+    if (err) { console.warn(err); return; }
+    channel = channelName;
+    socket.subscribe(channelName).watch(handleMessages);
+    socket.on(channelName, handleMessages);
+  });
   started = true;
+  relay('START');
+}
+
+function start() {
+  if (started || socket && socket.getState() === socket.CONNECTING) return;
 
   socket = socketCluster.connect(socketOptions);
   socket.on('error', function (err) {
     console.warn(err);
   });
-  socket.emit('login', 'master', (err, channelName) => {
-    if (err) { console.warn(err); return; }
-    channel = socket.subscribe(channelName);
-    channel.watch(handleMessages);
-    socket.on(channelName, handleMessages);
+  socket.on('connect', () => {
+    login();
   });
-  relay('START');
+  socket.on('disconnect', () => {
+    stop(true);
+  });
 }
 
-function stop() {
+function stop(keepConnected) {
   started = false;
   isMonitored = false;
-  if (channel) {
-    channel.unsubscribe();
-    channel.unwatch();
-  }
-  if (socket) {
+  if (!socket) return;
+  socket.destroyChannel(channel);
+  if (keepConnected) {
+    socket.off(channel, handleMessages);
+  } else {
     socket.off();
     socket.disconnect();
   }
