@@ -4,9 +4,8 @@ import configureStore from './configureStore';
 import { defaultSocketOptions } from './constants';
 import { getHostForRN } from './utils/reactNative';
 import { evalAction, getActionsArray } from 'remotedev-utils';
+import catchErrors from 'remotedev-utils/lib/catchErrors';
 import { isFiltered, filterStagedActions, filterState } from 'remotedev-utils/lib/filters';
-
-const ERROR = '@@remotedev/ERROR';
 
 const monitorActions = [ // To be skipped for relaying actions
   '@@redux/INIT', 'TOGGLE_ACTION', 'SWEEP', 'IMPORT_STATE', 'SET_ACTIONS_ACTIVE'
@@ -129,38 +128,6 @@ function sendError(errorAction) {
   });
 }
 
-function catchErrors() {
-  if (typeof window === 'object' && typeof window.onerror === 'object') {
-    window.onerror = function (message, url, lineNo, columnNo, error) {
-      const errorAction = { type: ERROR, message, url, lineNo, columnNo };
-      if (error && error.stack) errorAction.stack = error.stack;
-      sendError(errorAction);
-      return false;
-    };
-  } else if (typeof global !== 'undefined' && global.ErrorUtils) {
-    global.ErrorUtils.setGlobalHandler((error, isFatal) => {
-      sendError({ type: ERROR, error, isFatal });
-    });
-  }
-
-  if (typeof console === 'object' && typeof console.error === 'function' && !console.beforeRemotedev) {
-    console.beforeRemotedev = console.error.bind(console);
-    console.error = function () {
-      let errorAction = { type: ERROR };
-      const error = arguments[0];
-      errorAction.message = error.message ? error.message : error;
-      if (error.sourceURL) {
-        errorAction = {
-          ...errorAction, sourceURL: error.sourceURL, line: error.line, column: error.column
-        };
-      }
-      if (error.stack) errorAction.stack = error.stack;
-      sendError(errorAction);
-      console.beforeRemotedev.apply(null, arguments);
-    };
-  }
-}
-
 function str2array(str) {
   return typeof str === 'string' ? [str] : str && str.length;
 }
@@ -187,7 +154,7 @@ function init(options) {
       `${socketOptions.secure ? 'https' : 'http'}://${socketOptions.hostname}:${socketOptions.port}`;
     instanceId = options.id;
   }
-  if (sendOnError === 1) catchErrors();
+  if (sendOnError === 1) catchErrors(sendError);
 
   if (options.actionCreators) actionCreators = () => getActionsArray(options.actionCreators);
   stateSanitizer = options.stateSanitizer;
