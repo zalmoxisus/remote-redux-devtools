@@ -51,10 +51,10 @@ function send() {
         payload: stringify(getLiftedState())
       })
     }).catch(function (err) {
-      console.warn(err);
+      console.log(err);
     });
   } catch (err) {
-    console.warn(err);
+    console.log(err);
   }
 }
 
@@ -163,7 +163,7 @@ function init(options) {
 
 function login() {
   socket.emit('login', 'master', (err, channelName) => {
-    if (err) { console.warn(err); return; }
+    if (err) { console.log(err); return; }
     channel = channelName;
     socket.subscribe(channelName).watch(handleMessages);
     socket.on(channelName, handleMessages);
@@ -177,7 +177,7 @@ function start() {
 
   socket = socketCluster.connect(socketOptions);
   socket.on('error', function (err) {
-    console.warn(err);
+    console.log(err);
   });
   socket.on('connect', () => {
     login();
