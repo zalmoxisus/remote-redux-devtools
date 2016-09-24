@@ -7,10 +7,6 @@ import { evalAction, getActionsArray } from 'remotedev-utils';
 import catchErrors from 'remotedev-utils/lib/catchErrors';
 import { isFiltered, filterStagedActions, filterState } from 'remotedev-utils/lib/filters';
 
-const monitorActions = [ // To be skipped for relaying actions
-  '@@redux/INIT', 'TOGGLE_ACTION', 'SWEEP', 'IMPORT_STATE', 'SET_ACTIONS_ACTIVE'
-];
-
 let instanceId;
 let instanceName;
 let socketOptions;
@@ -97,9 +93,9 @@ function handleMessages(message) {
     store.liftedStore.dispatch({
       type: 'IMPORT_STATE', nextLiftedState: parse(message.state)
     });
-  } if (message.type === 'UPDATE' || message.type === 'IMPORT') {
+  } else if (message.type === 'UPDATE') {
     relay('STATE', getLiftedState());
-  } if (message.type === 'START') {
+  } else if (message.type === 'START') {
     isMonitored = true;
     if (typeof actionCreators === 'function') actionCreators = actionCreators();
     relay('STATE', getLiftedState(), actionCreators);
@@ -229,11 +225,11 @@ function handleChange(state, liftedState, maxAge) {
 
   if (action.type === '@@INIT') {
     relay('INIT', state, { timestamp: Date.now() });
-  } else if (monitorActions.indexOf(lastAction) === -1) {
-    if (lastAction === 'JUMP_TO_STATE') return;
+  } else if (lastAction === 'PERFORM_ACTION') {
     relay('ACTION', state, liftedAction, nextActionId);
     if (!isExcess && maxAge) isExcess = liftedState.stagedActionIds.length >= maxAge;
   } else {
+    if (lastAction === 'JUMP_TO_STATE') return;
     relay('STATE', filterStagedActions(liftedState, filters));
   }
 }
