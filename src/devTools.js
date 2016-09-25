@@ -252,7 +252,11 @@ export default function devTools(options = {}) {
   return (next) => {
     return (reducer, initialState) => {
       store = configureStore(
-        next, monitorReducer, { maxAge, shouldCatchErrors: !!sendOnError }
+        next, monitorReducer, {
+          maxAge,
+          shouldCatchErrors: !!sendOnError,
+          shouldHotReload: options.shouldHotReload
+        }
       )(reducer, initialState);
 
       if (realtime) start();
