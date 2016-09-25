@@ -24,6 +24,7 @@ let sendOn;
 let sendOnError;
 let sendTo;
 let lastErrorMsg;
+let locked;
 let actionCreators;
 let stateSanitizer;
 let actionSanitizer;
@@ -218,6 +219,10 @@ function monitorReducer(state = {}, action) {
 
 function handleChange(state, liftedState, maxAge) {
   if (checkForReducerErrors(liftedState)) return;
+  if (lastAction === 'LOCK_CHANGES') {
+    if (liftedState.dropNewActions === locked) return;
+    locked = liftedState.dropNewActions;
+  }
 
   const nextActionId = liftedState.nextActionId;
   const liftedAction = liftedState.actionsById[nextActionId - 1];
