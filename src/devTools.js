@@ -224,13 +224,9 @@ function handleChange(state, liftedState, maxAge) {
     locked = liftedState.dropNewActions;
   }
 
-  const nextActionId = liftedState.nextActionId;
-  const liftedAction = liftedState.actionsById[nextActionId - 1];
-  const action = liftedAction.action;
-
-  if (action.type === '@@INIT') {
-    relay('INIT', state, { timestamp: Date.now() });
-  } else if (lastAction === 'PERFORM_ACTION') {
+  if (lastAction === 'PERFORM_ACTION') {
+    const nextActionId = liftedState.nextActionId;
+    const liftedAction = liftedState.actionsById[nextActionId - 1];
     relay('ACTION', state, liftedAction, nextActionId);
     if (!isExcess && maxAge) isExcess = liftedState.stagedActionIds.length >= maxAge;
   } else {
