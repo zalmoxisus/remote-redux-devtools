@@ -267,7 +267,12 @@ export default function devTools(options = {}) {
 export function preDevTools(createStore) {
   return (reducer, preloadedState, enhancer) => {
     store = createStore(reducer, preloadedState, enhancer);
-    return store;
+    return {
+      ...store,
+      dispatch: (action) => (
+        locked ? action : store.dispatch(action)
+      )
+    };
   };
 }
 
