@@ -1,1 +1,2 @@
-module.exports = require('./devTools').default;
+export default from './devTools';
+export { composeWithDevTools } from './devTools';

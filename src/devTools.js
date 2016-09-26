@@ -264,6 +264,26 @@ export default function devTools(options = {}) {
   };
 }
 
+export function preDevTools(createStore) {
+  return (reducer, preloadedState, enhancer) => {
+    store = createStore(reducer, preloadedState, enhancer);
+    return store;
+  };
+}
+
 devTools.updateStore = (newStore) => {
   store = newStore;
 };
+
+export function composeWithDevTools(...funcs) {
+  if (funcs.length === 0) {
+    return devTools;
+  }
+
+  if (funcs.length === 1 && typeof funcs[0] === 'object') {
+    return devTools(funcs[0]);
+  }
+
+  return (options) => (...args) =>
+    [preDevTools, ...funcs].reduceRight((composed, f) => f(composed), devTools(options)(...args));
+}
