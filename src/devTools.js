@@ -219,10 +219,6 @@ function monitorReducer(state = {}, action) {
 
 function handleChange(state, liftedState, maxAge) {
   if (checkForReducerErrors(liftedState)) return;
-  if (lastAction === 'LOCK_CHANGES') {
-    if (liftedState.dropNewActions === locked) return;
-    locked = liftedState.dropNewActions;
-  }
 
   if (lastAction === 'PERFORM_ACTION') {
     const nextActionId = liftedState.nextActionId;
@@ -231,6 +227,7 @@ function handleChange(state, liftedState, maxAge) {
     if (!isExcess && maxAge) isExcess = liftedState.stagedActionIds.length >= maxAge;
   } else {
     if (lastAction === 'JUMP_TO_STATE') return;
+    if (lastAction === 'LOCK_CHANGES') locked = liftedState.dropNewActions;
     relay('STATE', filterStagedActions(liftedState, filters));
   }
 }
