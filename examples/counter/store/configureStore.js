@@ -1,15 +1,14 @@
 import { createStore, applyMiddleware, compose } from 'redux';
 import thunk from 'redux-thunk';
 import invariant from 'redux-immutable-state-invariant';
-import devTools from 'remote-redux-devtools';
+import { composeWithDevTools } from 'remote-redux-devtools';
 import reducer from '../reducers';
 
 export default function configureStore(initialState) {
 
-  const store = createStore(reducer, initialState, compose(
+  const store = createStore(reducer, initialState, composeWithDevTools(
     applyMiddleware(invariant(), thunk),
-    devTools({ realtime: true })
-  ));
+  )({ realtime: true }));
 
   if (module.hot) {
     // Enable Webpack hot module replacement for reducers
