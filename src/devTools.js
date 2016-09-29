@@ -227,7 +227,7 @@ function handleChange(state, liftedState, maxAge) {
     if (!isExcess && maxAge) isExcess = liftedState.stagedActionIds.length >= maxAge;
   } else {
     if (lastAction === 'JUMP_TO_STATE') return;
-    if (lastAction === 'LOCK_CHANGES') locked = liftedState.dropNewActions;
+    if (lastAction === 'LOCK_CHANGES') locked = liftedState.isLocked;
     relay('STATE', filterStagedActions(liftedState, filters));
   }
 }
@@ -248,7 +248,9 @@ export default function devTools(options = {}) {
         next, monitorReducer, {
           maxAge,
           shouldCatchErrors: !!sendOnError,
-          shouldHotReload: options.shouldHotReload
+          shouldHotReload: options.shouldHotReload,
+          shouldRecordChanges: options.shouldRecordChanges,
+          shouldStartLocked: options.shouldStartLocked
         }
       )(reducer, initialState);
 
