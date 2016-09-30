@@ -25,6 +25,7 @@ let sendOnError;
 let sendTo;
 let lastErrorMsg;
 let locked;
+let paused;
 let actionCreators;
 let stateSanitizer;
 let actionSanitizer;
@@ -227,7 +228,15 @@ function handleChange(state, liftedState, maxAge) {
     if (!isExcess && maxAge) isExcess = liftedState.stagedActionIds.length >= maxAge;
   } else {
     if (lastAction === 'JUMP_TO_STATE') return;
-    if (lastAction === 'LOCK_CHANGES') locked = liftedState.isLocked;
+    if (lastAction === 'PAUSE_RECORDING') {
+      paused = liftedState.isPaused;
+    } else if (lastAction === 'LOCK_CHANGES') {
+      locked = liftedState.isLocked;
+    }
+    if (paused) {
+      if (lastAction) lastAction = undefined;
+      else return;
+    }
     relay('STATE', filterStagedActions(liftedState, filters));
   }
 }
