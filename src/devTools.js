@@ -259,7 +259,8 @@ export default function devTools(options = {}) {
           shouldCatchErrors: !!sendOnError,
           shouldHotReload: options.shouldHotReload,
           shouldRecordChanges: options.shouldRecordChanges,
-          shouldStartLocked: options.shouldStartLocked
+          shouldStartLocked: options.shouldStartLocked,
+          pauseActionType: options.pauseActionType || '@@PAUSED'
         }
       )(reducer, initialState);
 
