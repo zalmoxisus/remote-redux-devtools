@@ -13,40 +13,65 @@ npm install --save-dev remote-redux-devtools
 
 ### Usage
 
-Just [add our store enhancer to your store](https://github.com/zalmoxisus/remote-redux-devtools/commit/eb18fc49e1f083a2330939af52da349b862f8df1):
+There are 2 ways of usage depending if you're using other store enhancers (middlewares) or not.
 
-##### `store/configureStore.js`
+#### Add DevTools enhancer to your store
 
-```js
-import { createStore, applyMiddleware, compose } from 'redux';
-import thunk from 'redux-thunk';
-import devTools from 'remote-redux-devtools';
-import reducer from '../reducers';
+If you have a basic [store](http://redux.js.org/docs/api/createStore.html) as described in the official [redux-docs](http://redux.js.org/index.html), simply replace:
+  ```javascript
+  import { createStore } from 'redux';
+  const store = createStore(reducer);
+  ```
+  with
+  ```javascript
+  import { createStore } from 'redux';
+  import devToolsEnhancer from 'remote-redux-devtools';
+  const store = createStore(reducer, devToolsEnhancer());
+  // or const store = createStore(reducer, preloadedState, devToolsEnhancer());
+  ```
+  
+> Note: passing enhancer as last argument requires redux@>=3.1.0
 
-export default function configureStore(initialState) {
-  const enhancer = compose(
-    applyMiddleware(thunk),
-    devTools()
-  );
-  // Note: passing enhancer as last argument requires redux@>=3.1.0
-  const store = createStore(reducer, initialState, enhancer);
-  // If you have other enhancers & middlewares
-  // update the store after creating / changing to allow devTools to use them
-  devTools.updateStore(store);
-  return store;
-}
-```
+#### Use DevTools compose helper
+
+  If you setup your store with [middleware and enhancers](http://redux.js.org/docs/api/applyMiddleware.html), change this:
+  ```javascript
+  import { createStore, applyMiddleware, compose } from 'redux';
+  
+  const store = createStore(reducer, preloadedState, compose(
+    applyMiddleware(...middleware),
+    // other store enhancers if any
+  ));
+  ```
+  to:
+  ```javascript
+  import { createStore, applyMiddleware } from 'redux';
+  import { composeWithDevTools } from 'remote-redux-devtools';
+  
+  const store = composeWithDevTools(reducer, /* preloadedState, */ composeWithDevTools(
+    applyMiddleware(...middleware),
+    // other store enhancers if any
+  ));
+  ```
+  or with devTools' options:
+  ```javascript
+  import { createStore, applyMiddleware } from 'redux';
+  import { composeWithDevTools } from 'remote-redux-devtools';
+  
+  const composeEnhancers = composeWithDevTools({ realtime: true, port: 8000 });
+  const store = composeWithDevTools(reducer, /* preloadedState, */ composeEnhancers(
+    applyMiddleware(...middleware),
+    // other store enhancers if any
+  ));
+  ```
 
 #### Important
 
 In order not to allow it in production by default, the enhancer will have effect only when `process.env.NODE_ENV === 'development'`. In case you don't set `NODE_ENV` or want to use it in production, set `realtime` parameter to `true`:
 
-```js
-const enhancer = compose(
-  applyMiddleware(thunk),
-  devTools({ realtime: true })
-);
-```
+  ```js
+  const store = createStore(reducer, devToolsEnhancer({ realtime: true }));
+  ```
 
 ### Monitoring
 
@@ -101,12 +126,11 @@ All parameters are optional. You have to provide at least `port` property to use
 
 Example:
 ```js
-export default function configureStore(initialState) {
-  // Note: passing enhancer as last argument requires redux@>=3.1.0
+export default function configureStore(preloadedState) {
   const store = createStore(
-    rootReducer,
-    initialState,
-    devTools({
+    reducer,
+    preloadedState,
+    devToolsEnhancer({
       name: 'Android app', realtime: true,
       hostname: 'localhost', port: 8000,
       maxAge: 30, filters: { blacklist: ['EFFECT_RESOLVED'] },
@@ -117,9 +141,6 @@ export default function configureStore(initialState) {
       stateSanitizer: (state) => state.data ? { ...state, data: '<<LONG_BLOB>>' } : state
     })
   );
-  // If you have other enhancers & middlewares
-  // update the store after creating / changing to allow devTools to use them
-  devTools.updateStore(store);
   return store;
 }
 ```

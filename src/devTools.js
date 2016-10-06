@@ -286,7 +286,8 @@ export function preEnhancer(createStore) {
 }
 
 devToolsEnhancer.updateStore = (newStore) => {
-  console.warn('devTools.updateStore is deprecated use composeWithDevTools instead');
+  console.warn('devTools.updateStore is deprecated use composeWithDevTools instead: ' +
+    'https://github.com/zalmoxisus/remote-redux-devtools#use-devtools-compose-helper');
   store = newStore;
 };
 
