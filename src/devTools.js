@@ -233,7 +233,7 @@ function handleChange(state, liftedState, maxAge) {
     } else if (lastAction === 'LOCK_CHANGES') {
       locked = liftedState.isLocked;
     }
-    if (paused) {
+    if (paused || locked) {
       if (lastAction) lastAction = undefined;
       else return;
     }
@@ -241,7 +241,7 @@ function handleChange(state, liftedState, maxAge) {
   }
 }
 
-export default function devTools(options = {}) {
+export default function devToolsEnhancer(options = {}) {
   init({
     ...options,
     hostname: getHostForRN(options.hostname)
@@ -273,7 +273,7 @@ export default function devTools(options = {}) {
   };
 }
 
-export function preDevTools(createStore) {
+export function preEnhancer(createStore) {
   return (reducer, preloadedState, enhancer) => {
     store = createStore(reducer, preloadedState, enhancer);
     return {
@@ -285,19 +285,22 @@ export function preDevTools(createStore) {
   };
 }
 
-devTools.updateStore = (newStore) => {
+devToolsEnhancer.updateStore = (newStore) => {
+  console.warn('devTools.updateStore is deprecated use composeWithDevTools instead');
   store = newStore;
 };
 
+const compose = (options) => (...funcs) => (...args) =>
+ [preEnhancer, ...funcs].reduceRight(
+    (composed, f) => f(composed), devToolsEnhancer(options)(...args)
+  );
+
 export function composeWithDevTools(...funcs) {
   if (funcs.length === 0) {
-    return devTools;
+    return devToolsEnhancer();
   }
-
   if (funcs.length === 1 && typeof funcs[0] === 'object') {
-    return devTools(funcs[0]);
+    return compose(funcs[0]);
   }
-
-  return (options) => (...args) =>
-    [preDevTools, ...funcs].reduceRight((composed, f) => f(composed), devTools(options)(...args));
+  return compose({})(...funcs);
 }
