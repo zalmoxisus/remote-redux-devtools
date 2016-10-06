@@ -1,6 +1,6 @@
 {
   "name": "remote-redux-devtools",
-  "version": "0.4.9",
+  "version": "0.5.0",
   "description": "Relay Redux actions to remote Redux DevTools.",
   "main": "lib/index.js",
   "files": [
