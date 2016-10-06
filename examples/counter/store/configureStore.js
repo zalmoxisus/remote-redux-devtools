@@ -3,12 +3,14 @@ import thunk from 'redux-thunk';
 import invariant from 'redux-immutable-state-invariant';
 import { composeWithDevTools } from 'remote-redux-devtools';
 import reducer from '../reducers';
+import * as actionCreators from '../actions/counter';
 
 export default function configureStore(initialState) {
 
-  const store = createStore(reducer, initialState, composeWithDevTools(
-    applyMiddleware(invariant(), thunk),
-  )({ realtime: true }));
+  const composeEnhancers = composeWithDevTools({ realtime: true, actionCreators });
+  const store = createStore(reducer, initialState, composeEnhancers(
+    applyMiddleware(invariant(), thunk)
+  ));
 
   if (module.hot) {
     // Enable Webpack hot module replacement for reducers
