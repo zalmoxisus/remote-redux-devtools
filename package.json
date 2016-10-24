@@ -56,6 +56,6 @@
     "querystring": "^0.2.0",
     "redux-devtools-instrument": "^1.3.1",
     "remotedev-utils": "0.0.5",
-    "socketcluster-client": "4.3.19"
+    "socketcluster-client": "^5.0.14"
   }
 }
