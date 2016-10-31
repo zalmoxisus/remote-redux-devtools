@@ -59,7 +59,7 @@ If you have a basic [store](http://redux.js.org/docs/api/createStore.html) as de
   import { composeWithDevTools } from 'remote-redux-devtools';
   
   const composeEnhancers = composeWithDevTools({ realtime: true, port: 8000 });
-  const store = composeWithDevTools(reducer, /* preloadedState, */ composeEnhancers(
+  const store = createStore(reducer, /* preloadedState, */ composeEnhancers(
     applyMiddleware(...middleware),
     // other store enhancers if any
   ));
