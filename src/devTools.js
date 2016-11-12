@@ -57,7 +57,7 @@ function send() {
 }
 
 function relay(type, state, action, nextActionId) {
-  if (isFiltered(action, filters)) return;
+  if (!Array.isArray(action) && isFiltered(action, filters)) return;
   const message = {
     type,
     id: socket.id,
