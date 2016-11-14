@@ -131,7 +131,11 @@ function str2array(str) {
 
 function init(options) {
   instanceName = options.name;
-  if (options.filters) {
+  if (options.actionsBlacklist) {
+    filters = { blacklist: options.actionsBlacklist };
+  } else if (options.actionsWhitelist) {
+    filters = { whitelist: options.actionsWhitelist };
+  } else if (options.filters) {
     filters = options.filters;
   }
   if (options.port) {

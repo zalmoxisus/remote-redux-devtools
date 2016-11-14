@@ -108,7 +108,8 @@ Name                  | Description
 `port`                | *Number* used to specify host's port for [`remotedev-server`](https://github.com/zalmoxisus/remotedev-server).
 `secure`              | *Boolean* specifies whether to use `https` protocol for [`remotedev-server`](https://github.com/zalmoxisus/remotedev-server).
 `maxAge`              | *Number* of maximum allowed actions to be stored on the history tree, the oldest actions are removed once maxAge is reached. Default is `30`.
-`filters`             | *Map of arrays* named `whitelist` or `blacklist` to filter action types.  See the example bellow.
+`actionsBlacklist`    | *array* of actions to be hidden in DevTools. Overwrites corresponding global setting in the options page. See the example bellow.
+`actionsWhitelist`    | *array* of actions to be shown. All other actions will be hidden in DevTools.
 `actionSanitizer`     | *Function* which takes action object and id number as arguments, and should return action object back. See the example bellow.
 `stateSanitizer`      | *Function* which takes state object and index as arguments, and should return state object back. See the example bellow.
 `startOn`             | *String* or *Array of strings* indicating an action or a list of actions, which should start remote monitoring (when `realtime` is `false`). 
@@ -133,7 +134,7 @@ export default function configureStore(preloadedState) {
     devToolsEnhancer({
       name: 'Android app', realtime: true,
       hostname: 'localhost', port: 8000,
-      maxAge: 30, filters: { blacklist: ['EFFECT_RESOLVED'] },
+      maxAge: 30, actionsBlacklist: ['EFFECT_RESOLVED'],
       actionSanitizer: (action) => (
        action.type === 'FILE_DOWNLOAD_SUCCESS' && action.data ?
        { ...action, data: '<<LONG_BLOB>>' } : action
