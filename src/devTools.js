@@ -57,7 +57,6 @@ function send() {
 }
 
 function relay(type, state, action, nextActionId) {
-  if (!Array.isArray(action) && isFiltered(action, filters)) return;
   const message = {
     type,
     id: socket.id,
@@ -224,6 +223,7 @@ function handleChange(state, liftedState, maxAge) {
   if (lastAction === 'PERFORM_ACTION') {
     const nextActionId = liftedState.nextActionId;
     const liftedAction = liftedState.actionsById[nextActionId - 1];
+    if (isFiltered(liftedAction.action, filters)) return;
     relay('ACTION', state, liftedAction, nextActionId);
     if (!isExcess && maxAge) isExcess = liftedState.stagedActionIds.length >= maxAge;
   } else {
