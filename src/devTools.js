@@ -5,7 +5,12 @@ import { defaultSocketOptions } from './constants';
 import { getHostForRN } from './utils/reactNative';
 import { evalAction, getActionsArray } from 'remotedev-utils';
 import catchErrors from 'remotedev-utils/lib/catchErrors';
-import { isFiltered, filterStagedActions, filterState } from 'remotedev-utils/lib/filters';
+import {
+  getLocalFilter,
+  isFiltered,
+  filterStagedActions,
+  filterState
+} from 'remotedev-utils/lib/filters';
 
 let instanceId;
 let instanceName;
@@ -131,13 +136,11 @@ function str2array(str) {
 
 function init(options) {
   instanceName = options.name;
-  if (options.actionsBlacklist) {
-    filters = { blacklist: options.actionsBlacklist };
-  } else if (options.actionsWhitelist) {
-    filters = { whitelist: options.actionsWhitelist };
-  } else if (options.filters) {
-    filters = options.filters;
-  }
+  const { blacklist, whitelist } = options.filters || {};
+  filters = getLocalFilter({
+    actionsBlacklist: blacklist || options.actionsBlacklist,
+    actionsWhitelist: whitelist || options.actionsWhitelist
+  });
   if (options.port) {
     socketOptions = {
       port: options.port,
