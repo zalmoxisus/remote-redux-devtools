@@ -1,5 +1,5 @@
 var createStore = require('redux').createStore
-var devTools = require('remote-redux-devtools')
+var devTools = require('remote-redux-devtools').default
 
 function counter(state, action) {
   if (state === undefined) state = 0
