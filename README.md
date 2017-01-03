@@ -65,13 +65,26 @@ If you have a basic [store](http://redux.js.org/docs/api/createStore.html) as de
   ));
   ```
 
-#### Important
+### Enabling
 
-In order not to allow it in production by default, the enhancer will have effect only when `process.env.NODE_ENV === 'development'`. In case you don't set `NODE_ENV` or want to use it in production, set `realtime` parameter to `true`:
+In order not to allow it in production by default, the enhancer will have effect only when `process.env.NODE_ENV === 'development'`.
 
-  ```js
-  const store = createStore(reducer, devToolsEnhancer({ realtime: true }));
-  ```
+For Webpack you should add it as following (`webpack.config.dev.js`):
+```js
+// ...
+plugins: [
+  new webpack.DefinePlugin({
+    'process.env.NODE_ENV': JSON.stringify('production')
+  })
+],
+// ...
+```
+
+In case you don't set `NODE_ENV`, you can set `realtime` parameter to `true` or to other global variable to turn it off in production:
+
+```js
+const store = createStore(reducer, devToolsEnhancer({ realtime: true }));
+```
 
 ### Monitoring
 
