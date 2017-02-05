@@ -11,7 +11,7 @@ Use [Redux DevTools](https://github.com/gaearon/redux-devtools) remotely for Rea
 npm install --save-dev remote-redux-devtools
 ```
 
-> Note that if you are using a earlier version than `react-native@0.41.0` on Windows, you should use `remote-redux-devtools@0.5.0` (due to a Windows issue fixed in `react-native@0.41.0`).
+> Note: for Windows use `remote-redux-devtools@0.5.0` (newer versions will not work due to a Windows issue fixed in `react-native`).
 
 ### Usage
 
