@@ -96,6 +96,7 @@ Use one of our monitor apps to inspect and dispatch actions:
 * [remote-redux-devtools-on-debugger](https://github.com/jhen0409/remote-redux-devtools-on-debugger) - Used in React Native debugger as a dock monitor.
 * [atom-redux-devtools](https://github.com/zalmoxisus/atom-redux-devtools) - Used in Atom editor.
 * [redux-dispatch-cli](https://github.com/jhen0409/redux-dispatch-cli) - A CLI tool for Redux remote dispatch.
+* [vscode-redux-devtools](https://github.com/jkzing/vscode-redux-devtools) - Used in Visual Studio Code.
 
 Use [remotedev-app](https://github.com/zalmoxisus/remotedev-app) to create your own monitor app.
 
