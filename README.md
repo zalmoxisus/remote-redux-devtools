@@ -34,9 +34,11 @@ If you have a basic [store](http://redux.js.org/docs/api/createStore.html) as de
   
 > Note: passing enhancer as last argument requires redux@>=3.1.0
 
-#### Use DevTools compose helper
+#### When to use DevTools compose helper
 
-  If you setup your store with [middleware and enhancers](http://redux.js.org/docs/api/applyMiddleware.html), change this:
+  If you setup your store with [middlewares and enhancers](http://redux.js.org/docs/api/applyMiddleware.html) like [redux-saga](https://github.com/redux-saga/redux-saga) and similar, it is crucial to use `composeWithDevTools` export. Otherwise, actions dispatched from Redux DevTools will not flow to your middlewares.
+
+  In that case change this:
   ```javascript
   import { createStore, applyMiddleware, compose } from 'redux';
   
