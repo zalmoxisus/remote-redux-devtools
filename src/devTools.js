@@ -199,11 +199,8 @@ function start() {
   socket = socketCluster.connect(socketOptions);
 
   socket.on('error', function (err) {
-    if (errorCounts.hasOwnProperty(err.name)) {
-      errorCounts[err.name]++; // add one for this error
-    } else {
-      errorCounts[err.name] = 1;
-    }
+    // if we've already had this error before, increment it's counter, otherwise assign it '1' since we've had the error once.
+    errorCounts[err.name] = errorCounts.hasOwnProperty(err.name) ? errorCounts[err.name] + 1 : 1;
 
     if (suppressConnectErrors) {
       if (errorCounts[err.name] === 1) {
@@ -217,7 +214,7 @@ function start() {
   });
   socket.on('connect', () => {
     console.log('connected to remotedev-server');
-    errorCounts = {}; // clear the errorCounter object, so that we'll log any new errors in the event of a disconnect
+    errorCounts = {}; // clear the errorCounts object, so that we'll log any new errors in the event of a disconnect
     login();
   });
   socket.on('disconnect', () => {
