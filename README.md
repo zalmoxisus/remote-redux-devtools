@@ -116,28 +116,29 @@ For React Native you can use [react-native-debugger](https://github.com/jhen0409
 
 ### Parameters
 
-Name                  | Description
--------------         | -------------
-`name`                | *String* representing the instance name to be shown on the remote monitor.
-`realtime`            | *Boolean* specifies whether to allow remote monitoring. By default is `process.env.NODE_ENV === 'development'`. 
-`hostname`            | *String* used to specify host for [`remotedev-server`](https://github.com/zalmoxisus/remotedev-server). If `port` is specified, default value is `localhost`.
-`port`                | *Number* used to specify host's port for [`remotedev-server`](https://github.com/zalmoxisus/remotedev-server).
-`secure`              | *Boolean* specifies whether to use `https` protocol for [`remotedev-server`](https://github.com/zalmoxisus/remotedev-server).
-`maxAge`              | *Number* of maximum allowed actions to be stored on the history tree, the oldest actions are removed once maxAge is reached. Default is `30`.
-`actionsBlacklist`    | *array* of actions to be hidden in DevTools. Overwrites corresponding global setting in the options page. See the example bellow.
-`actionsWhitelist`    | *array* of actions to be shown. All other actions will be hidden in DevTools.
-`actionSanitizer`     | *Function* which takes action object and id number as arguments, and should return action object back. See the example bellow.
-`stateSanitizer`      | *Function* which takes state object and index as arguments, and should return state object back. See the example bellow.
-`startOn`             | *String* or *Array of strings* indicating an action or a list of actions, which should start remote monitoring (when `realtime` is `false`). 
-`stopOn`              | *String* or *Array of strings* indicating an action or a list of actions, which should stop remote monitoring. 
-`sendOn`              | *String* or *Array of strings* indicating an action or a list of actions, which should trigger sending the history to the monitor (without starting it). *Note*: when using it, add a `fetch` polyfill if needed.
-`sendOnError`         | *Numeric* code: `0` - disabled (default), `1` - send all uncaught exception messages, `2` - send only reducers error messages.
-`sendTo`              | *String* url of the monitor to send the history when `sendOn` is triggered. By default is `${secure ? 'https' : 'http'}://${hostname}:${port}`.
-`actionCreators`      | *Array* or *Object* of action creators to dispatch remotely. See [the example](https://github.com/zalmoxisus/remote-redux-devtools/commit/b54652930dfd4e057991df8471c343957fd7bff7).
-`shouldHotReload`     | *Boolean* - if set to `false`, will not recompute the states on hot reloading (or on replacing the reducers). Default to `true`.
- `shouldRecordChanges`| *Boolean* - if specified as `false`, it will not record the changes till clicked on "Start recording" button on the monitor app. Default is `true`.
- `shouldStartLocked`  | *Boolean* - if specified as `true`, it will not allow any non-monitor actions to be dispatched till `lockChanges(false)` is dispatched. Default is `false`.
-`id`                  | *String* to identify the instance when sending the history triggered by `sendOn`. You can use, for example, user id here, to know who sent the data.
+Name                    | Description
+-------------           | -------------
+`name`                  | *String* representing the instance name to be shown on the remote monitor.
+`realtime`              | *Boolean* specifies whether to allow remote monitoring. By default is `process.env.NODE_ENV === 'development'`. 
+`hostname`              | *String* used to specify host for [`remotedev-server`](https://github.com/zalmoxisus/remotedev-server). If `port` is specified, default value is `localhost`.
+`port`                  | *Number* used to specify host's port for [`remotedev-server`](https://github.com/zalmoxisus/remotedev-server).
+`secure`                | *Boolean* specifies whether to use `https` protocol for [`remotedev-server`](https://github.com/zalmoxisus/remotedev-server).
+`maxAge`                | *Number* of maximum allowed actions to be stored on the history tree, the oldest actions are removed once maxAge is reached. Default is `30`.
+`actionsBlacklist`      | *array* of actions to be hidden in DevTools. Overwrites corresponding global setting in the options page. See the example bellow.
+`actionsWhitelist`      | *array* of actions to be shown. All other actions will be hidden in DevTools.
+`actionSanitizer`       | *Function* which takes action object and id number as arguments, and should return action object back. See the example bellow.
+`stateSanitizer`        | *Function* which takes state object and index as arguments, and should return state object back. See the example bellow.
+`startOn`               | *String* or *Array of strings* indicating an action or a list of actions, which should start remote monitoring (when `realtime` is `false`). 
+`stopOn`                | *String* or *Array of strings* indicating an action or a list of actions, which should stop remote monitoring. 
+`sendOn`                | *String* or *Array of strings* indicating an action or a list of actions, which should trigger sending the history to the monitor (without starting it). *Note*: when using it, add a `fetch` polyfill if needed.
+`sendOnError`           | *Numeric* code: `0` - disabled (default), `1` - send all uncaught exception messages, `2` - send only reducers error messages.
+`sendTo`                | *String* url of the monitor to send the history when `sendOn` is triggered. By default is `${secure ? 'https' : 'http'}://${hostname}:${port}`.
+`actionCreators`        | *Array* or *Object* of action creators to dispatch remotely. See [the example](https://github.com/zalmoxisus/remote-redux-devtools/commit/b54652930dfd4e057991df8471c343957fd7bff7).
+`shouldHotReload`       | *Boolean* - if set to `false`, will not recompute the states on hot reloading (or on replacing the reducers). Default to `true`.
+ `shouldRecordChanges`  | *Boolean* - if specified as `false`, it will not record the changes till clicked on "Start recording" button on the monitor app. Default is `true`.
+ `shouldStartLocked`    | *Boolean* - if specified as `true`, it will not allow any non-monitor actions to be dispatched till `lockChanges(false)` is dispatched. Default is `false`.
+`id`                    | *String* to identify the instance when sending the history triggered by `sendOn`. You can use, for example, user id here, to know who sent the data.
+`suppressConnectErrors` | *Boolean* - if set to `false`, all socket errors thrown while trying to connect will be printed to the console, regardless of if they've been thrown before. This is primarily for suppressing `SocketProtocolError` errors, which get repeatedly thrown when trying to make a connection.  Default is `true`.
 
 All parameters are optional. You have to provide at least `port` property to use `localhost` instead of `remotedev.io` server.
 
