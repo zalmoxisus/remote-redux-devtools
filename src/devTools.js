@@ -14,6 +14,8 @@ import {
 
 let instanceId;
 let instanceName;
+let suppressConnectErrors;
+let errorCounts = {};
 let socketOptions;
 let socket;
 let channel;
@@ -149,6 +151,8 @@ function init(options) {
     };
   } else socketOptions = defaultSocketOptions;
 
+  suppressConnectErrors = options.suppressConnectErrors ? options.suppressConnectErrors : false;
+
   startOn = str2array(options.startOn);
   stopOn = str2array(options.stopOn);
   sendOn = str2array(options.sendOn);
@@ -193,10 +197,24 @@ function start() {
   if (started || socket && socket.getState() === socket.CONNECTING) return;
 
   socket = socketCluster.connect(socketOptions);
+
   socket.on('error', function (err) {
-    console.log(err);
+    // if we've already had this error before, increment it's counter, otherwise assign it '1' since we've had the error once.
+    errorCounts[err.name] = errorCounts.hasOwnProperty(err.name) ? errorCounts[err.name] + 1 : 1;
+
+    if (suppressConnectErrors) {
+      if (errorCounts[err.name] === 1) {
+        console.log('remote-redux-devtools: Socket connection errors are being suppressed. ' + '\n' +
+              'To disable this suppression, include the logRepeatedConnectErrors with a value of \'true\'.');
+        console.log(err);
+      }
+    } else {
+      console.log(err);
+    }
   });
   socket.on('connect', () => {
+    console.log('connected to remotedev-server');
+    errorCounts = {}; // clear the errorCounts object, so that we'll log any new errors in the event of a disconnect
     login();
   });
   socket.on('disconnect', () => {
