@@ -205,7 +205,7 @@ function start() {
     if (suppressConnectErrors) {
       if (errorCounts[err.name] === 1) {
         console.log('remote-redux-devtools: Socket connection errors are being suppressed. ' + '\n' +
-              'To disable this suppression, include the logRepeatedConnectErrors with a value of \'true\'.');
+              'To disable this suppression, include the suppressConnectErrors with a value of \'true\'.');
         console.log(err);
       }
     } else {
