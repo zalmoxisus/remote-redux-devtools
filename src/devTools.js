@@ -151,7 +151,7 @@ function init(options) {
     };
   } else socketOptions = defaultSocketOptions;
 
-  suppressConnectErrors = options.suppressConnectErrors ? options.suppressConnectErrors : true;
+  suppressConnectErrors = options.suppressConnectErrors !== undefined ? options.suppressConnectErrors : true;
 
   startOn = str2array(options.startOn);
   stopOn = str2array(options.stopOn);
