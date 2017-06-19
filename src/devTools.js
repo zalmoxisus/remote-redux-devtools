@@ -269,7 +269,7 @@ function handleChange(state, liftedState, maxAge) {
 export default function devToolsEnhancer(options = {}) {
   init({
     ...options,
-    hostname: getHostForRN(options.hostname)
+    hostname: getHostForRN(options.hostname || 'localhost')
   });
   const realtime = typeof options.realtime === 'undefined'
     ? process.env.NODE_ENV === 'development' : options.realtime;
