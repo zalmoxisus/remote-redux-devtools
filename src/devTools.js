@@ -2,7 +2,7 @@ import { stringify, parse } from 'jsan';
 import socketCluster from 'socketcluster-client';
 import configureStore from './configureStore';
 import { defaultSocketOptions } from './constants';
-import getHostForRN from 'rn-host-detect';
+import getHostForRN from './thirdparty/rn-host-detect'
 import { evalAction, getActionsArray } from 'remotedev-utils';
 import catchErrors from 'remotedev-utils/lib/catchErrors';
 import {
