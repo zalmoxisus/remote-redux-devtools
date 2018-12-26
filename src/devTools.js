@@ -3,14 +3,14 @@ import socketCluster from 'socketcluster-client';
 import configureStore from './configureStore';
 import { defaultSocketOptions } from './constants';
 import getHostForRN from 'rn-host-detect';
-import { evalAction, getActionsArray } from 'remotedev-utils';
-import catchErrors from 'remotedev-utils/lib/catchErrors';
+import { evalAction, getActionsArray } from 'redux-devtools-core/lib/utils';
+import catchErrors from 'redux-devtools-core/lib/utils/catchErrors';
 import {
   getLocalFilter,
   isFiltered,
   filterStagedActions,
   filterState
-} from 'remotedev-utils/lib/filters';
+} from 'redux-devtools-core/lib/utils/filters';
 
 let instanceId;
 let instanceName;

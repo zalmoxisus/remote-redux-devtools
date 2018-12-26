@@ -55,7 +55,7 @@
     "jsan": "^3.1.13",
     "querystring": "^0.2.0",
     "redux-devtools-instrument": "^1.9.3",
-    "remotedev-utils": "^0.1.1",
+    "redux-devtools-core": "^0.2.0",
     "rn-host-detect": "^1.1.5",
     "socketcluster-client": "^14.2.1"
   }
