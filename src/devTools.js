@@ -281,6 +281,8 @@ export default function devToolsEnhancer(options = {}) {
       store = configureStore(
         next, monitorReducer, {
           maxAge,
+          trace: options.trace,
+          traceLimit: options.traceLimit,
           shouldCatchErrors: !!sendOnError,
           shouldHotReload: options.shouldHotReload,
           shouldRecordChanges: options.shouldRecordChanges,

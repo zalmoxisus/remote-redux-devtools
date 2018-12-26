@@ -7,7 +7,7 @@ import * as actionCreators from '../actions/counter';
 
 export default function configureStore(initialState) {
 
-  const composeEnhancers = composeWithDevTools({ realtime: true, actionCreators });
+  const composeEnhancers = composeWithDevTools({ realtime: true, actionCreators, trace: true });
   const store = createStore(reducer, initialState, composeEnhancers(
     applyMiddleware(invariant(), thunk)
   ));
