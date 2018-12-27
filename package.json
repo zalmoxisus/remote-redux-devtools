@@ -1,6 +1,6 @@
 {
   "name": "remote-redux-devtools",
-  "version": "0.5.15",
+  "version": "0.5.16",
   "description": "Relay Redux actions to remote Redux DevTools.",
   "main": "lib/index.js",
   "files": [
@@ -55,7 +55,7 @@
     "jsan": "^3.1.13",
     "querystring": "^0.2.0",
     "redux-devtools-instrument": "^1.9.4",
-    "redux-devtools-core": "^0.2.0",
+    "redux-devtools-core": "^0.2.1",
     "rn-host-detect": "^1.1.5",
     "socketcluster-client": "^14.2.1"
   }
