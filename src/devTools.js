@@ -41,7 +41,7 @@ class DevToolsEnhancer {
     return filterStagedActions(this.getLiftedStateRaw(), this.filters);
   }
 
-  send() {
+  send = () => {
     if (!this.instanceId) this.instanceId = this.socket && this.socket.id || getRandomId();
     try {
       fetch(this.sendTo, {
@@ -61,7 +61,7 @@ class DevToolsEnhancer {
     } catch (err) {
       console.log(err);
     }
-  }
+  };
 
   relay(type, state, action, nextActionId) {
     const message = {
@@ -118,7 +118,7 @@ class DevToolsEnhancer {
     }
   };
 
-  sendError(errorAction) {
+  sendError = (errorAction) => {
     // Prevent flooding
     if (errorAction.message && errorAction.message === this.lastErrorMsg) return;
     this.lastErrorMsg = errorAction.message;
@@ -127,7 +127,7 @@ class DevToolsEnhancer {
       this.store.dispatch(errorAction);
       if (!this.started) this.send();
     });
-  }
+  };
 
   init(options) {
     this.instanceName = options.name;
@@ -174,7 +174,7 @@ class DevToolsEnhancer {
     this.relay('START');
   }
 
-  stop(keepConnected) {
+  stop = (keepConnected) => {
     this.started = false;
     this.isMonitored = false;
     if (!this.socket) return;
@@ -185,9 +185,9 @@ class DevToolsEnhancer {
       this.socket.off();
       this.socket.disconnect();
     }
-  }
+  };
 
-  start() {
+  start = () => {
     if (this.started || this.socket && this.socket.getState() === this.socket.CONNECTING) return;
 
     this.socket = socketCluster.connect(this.socketOptions);
@@ -214,16 +214,16 @@ class DevToolsEnhancer {
     this.socket.on('disconnect', () => {
       this.stop(true);
     });
-  }
+  };
 
-  checkForReducerErrors(liftedState = this.getLiftedStateRaw()) {
+  checkForReducerErrors = (liftedState = this.getLiftedStateRaw()) => {
     if (liftedState.computedStates[liftedState.currentStateIndex].error) {
       if (this.started) this.relay('STATE', filterStagedActions(liftedState, this.filters));
       else this.send();
       return true;
     }
     return false;
-  }
+  };
 
   monitorReducer = (state = {}, action) => {
     this.lastAction = action.type;
@@ -260,7 +260,7 @@ class DevToolsEnhancer {
     }
   }
 
-  enhance(options = {}) {
+  enhance = (options = {}) => {
     this.init({
       ...options,
       hostname: getHostForRN(options.hostname || 'localhost')
@@ -298,22 +298,22 @@ class DevToolsEnhancer {
 export default new DevToolsEnhancer().enhance;
 
 const compose = (options) => (...funcs) => (...args) => {
-  const enhancer = new DevToolsEnhancer();
+  const devToolsEnhancer = new DevToolsEnhancer();
 
   function preEnhancer(createStore) {
     return (reducer, preloadedState, enhancer) => {
-      enhancer.store = createStore(reducer, preloadedState, enhancer);
+      devToolsEnhancer.store = createStore(reducer, preloadedState, enhancer);
       return {
-        ...enhancer.store,
+        ...devToolsEnhancer.store,
         dispatch: (action) => (
-          enhancer.locked ? action : enhancer.store.dispatch(action)
+          devToolsEnhancer.locked ? action : devToolsEnhancer.store.dispatch(action)
         )
       };
     };
   }
 
   return [preEnhancer, ...funcs].reduceRight(
-    (composed, f) => f(composed), enhancer.enhance(options)(...args)
+    (composed, f) => f(composed), devToolsEnhancer.enhance(options)(...args)
   );
 };
 
