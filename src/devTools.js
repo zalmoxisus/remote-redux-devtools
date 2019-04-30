@@ -295,7 +295,7 @@ class DevToolsEnhancer {
   }
 }
 
-export default new DevToolsEnhancer().enhance;
+export default (...args) => new DevToolsEnhancer().enhance(...args);
 
 const compose = (options) => (...funcs) => (...args) => {
   const devToolsEnhancer = new DevToolsEnhancer();
