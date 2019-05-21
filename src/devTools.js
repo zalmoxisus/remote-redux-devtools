@@ -12,320 +12,314 @@ import {
   filterState
 } from 'redux-devtools-core/lib/utils/filters';
 
-let instanceId;
-let instanceName;
-let suppressConnectErrors;
-let errorCounts = {};
-let socketOptions;
-let socket;
-let channel;
-let store = {};
-let lastAction;
-let filters;
-let isExcess;
-let isMonitored;
-let started;
-let startOn;
-let stopOn;
-let sendOn;
-let sendOnError;
-let sendTo;
-let lastErrorMsg;
-let locked;
-let paused;
-let actionCreators;
-let stateSanitizer;
-let actionSanitizer;
-
-function getLiftedState() {
-  return filterStagedActions(store.liftedStore.getState(), filters);
-}
-
-function send() {
-  if (!instanceId) instanceId = socket && socket.id || Math.random().toString(36).substr(2);
-  try {
-    fetch(sendTo, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        type: 'STATE',
-        id: instanceId,
-        name: instanceName,
-        payload: stringify(getLiftedState())
-      })
-    }).catch(function (err) {
-      console.log(err);
-    });
-  } catch (err) {
-    console.log(err);
-  }
-}
-
-function relay(type, state, action, nextActionId) {
-  const message = {
-    type,
-    id: socket.id,
-    name: instanceName
-  };
-  if (state) {
-    message.payload = type === 'ERROR' ? state :
-      stringify(filterState(state, type, filters, stateSanitizer, actionSanitizer, nextActionId));
-  }
-  if (type === 'ACTION') {
-    message.action = stringify(
-      !actionSanitizer ? action : actionSanitizer(action.action, nextActionId - 1)
-    );
-    message.isExcess = isExcess;
-    message.nextActionId = nextActionId;
-  } else if (action) {
-    message.action = action;
-  }
-  socket.emit(socket.id ? 'log' : 'log-noid', message);
-}
-
-function dispatchRemotely(action) {
-  try {
-    const result = evalAction(action, actionCreators);
-    store.dispatch(result);
-  } catch (e) {
-    relay('ERROR', e.message);
-  }
-}
-
-function handleMessages(message) {
-  if (
-    message.type === 'IMPORT' || message.type === 'SYNC' && socket.id && message.id !== socket.id
-  ) {
-    store.liftedStore.dispatch({
-      type: 'IMPORT_STATE', nextLiftedState: parse(message.state)
-    });
-  } else if (message.type === 'UPDATE') {
-    relay('STATE', getLiftedState());
-  } else if (message.type === 'START') {
-    isMonitored = true;
-    if (typeof actionCreators === 'function') actionCreators = actionCreators();
-    relay('STATE', getLiftedState(), actionCreators);
-  } else if (message.type === 'STOP' || message.type === 'DISCONNECTED') {
-    isMonitored = false;
-    relay('STOP');
-  } else if (message.type === 'ACTION') {
-    dispatchRemotely(message.action);
-  } else if (message.type === 'DISPATCH') {
-    store.liftedStore.dispatch(message.action);
-  }
-}
-
 function async(fn) {
   setTimeout(fn, 0);
-}
-
-function sendError(errorAction) {
-  // Prevent flooding
-  if (errorAction.message && errorAction.message === lastErrorMsg) return;
-  lastErrorMsg = errorAction.message;
-
-  async(() => {
-    store.dispatch(errorAction);
-    if (!started) send();
-  });
 }
 
 function str2array(str) {
   return typeof str === 'string' ? [str] : str && str.length;
 }
 
-function init(options) {
-  instanceName = options.name;
-  const { blacklist, whitelist } = options.filters || {};
-  filters = getLocalFilter({
-    actionsBlacklist: blacklist || options.actionsBlacklist,
-    actionsWhitelist: whitelist || options.actionsWhitelist
-  });
-  if (options.port) {
-    socketOptions = {
-      port: options.port,
-      hostname: options.hostname || 'localhost',
-      secure: options.secure
+function getRandomId() {
+  return Math.random().toString(36).substr(2);
+}
+
+class DevToolsEnhancer {
+  constructor() {
+    this.enhance.updateStore = newStore => {
+      console.warn('devTools.updateStore is deprecated use composeWithDevTools instead: ' +
+        'https://github.com/zalmoxisus/remote-redux-devtools#use-devtools-compose-helper');
+      this.store = newStore;
     };
-  } else socketOptions = defaultSocketOptions;
-
-  suppressConnectErrors = options.suppressConnectErrors !== undefined ? options.suppressConnectErrors : true;
-
-  startOn = str2array(options.startOn);
-  stopOn = str2array(options.stopOn);
-  sendOn = str2array(options.sendOn);
-  sendOnError = options.sendOnError;
-  if (sendOn || sendOnError) {
-    sendTo = options.sendTo ||
-      `${socketOptions.secure ? 'https' : 'http'}://${socketOptions.hostname}:${socketOptions.port}`;
-    instanceId = options.id;
   }
-  if (sendOnError === 1) catchErrors(sendError);
 
-  if (options.actionCreators) actionCreators = () => getActionsArray(options.actionCreators);
-  stateSanitizer = options.stateSanitizer;
-  actionSanitizer = options.actionSanitizer;
-}
-
-function login() {
-  socket.emit('login', 'master', (err, channelName) => {
-    if (err) { console.log(err); return; }
-    channel = channelName;
-    socket.subscribe(channelName).watch(handleMessages);
-    socket.on(channelName, handleMessages);
-  });
-  started = true;
-  relay('START');
-}
-
-function stop(keepConnected) {
-  started = false;
-  isMonitored = false;
-  if (!socket) return;
-  socket.destroyChannel(channel);
-  if (keepConnected) {
-    socket.off(channel, handleMessages);
-  } else {
-    socket.off();
-    socket.disconnect();
+  getLiftedStateRaw() {
+    return this.store.liftedStore.getState();
   }
-}
 
-function start() {
-  if (started || socket && socket.getState() === socket.CONNECTING) return;
+  getLiftedState() {
+    return filterStagedActions(this.getLiftedStateRaw(), this.filters);
+  }
 
-  socket = socketCluster.connect(socketOptions);
-
-  socket.on('error', function (err) {
-    // if we've already had this error before, increment it's counter, otherwise assign it '1' since we've had the error once.
-    errorCounts[err.name] = errorCounts.hasOwnProperty(err.name) ? errorCounts[err.name] + 1 : 1;
-
-    if (suppressConnectErrors) {
-      if (errorCounts[err.name] === 1) {
-        console.log('remote-redux-devtools: Socket connection errors are being suppressed. ' + '\n' +
-              'This can be disabled by setting suppressConnectErrors to \'false\'.');
+  send = () => {
+    if (!this.instanceId) this.instanceId = this.socket && this.socket.id || getRandomId();
+    try {
+      fetch(this.sendTo, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          type: 'STATE',
+          id: this.instanceId,
+          name: this.instanceName,
+          payload: stringify(this.getLiftedState())
+        })
+      }).catch(function (err) {
         console.log(err);
-      }
-    } else {
+      });
+    } catch (err) {
       console.log(err);
     }
-  });
-  socket.on('connect', () => {
-    console.log('connected to remotedev-server');
-    errorCounts = {}; // clear the errorCounts object, so that we'll log any new errors in the event of a disconnect
-    login();
-  });
-  socket.on('disconnect', () => {
-    stop(true);
-  });
-}
+  };
 
-function checkForReducerErrors(liftedState = store.liftedStore.getState()) {
-  if (liftedState.computedStates[liftedState.currentStateIndex].error) {
-    if (started) relay('STATE', filterStagedActions(liftedState, filters));
-    else send();
-    return true;
-  }
-  return false;
-}
-
-function monitorReducer(state = {}, action) {
-  lastAction = action.type;
-  if (!started && sendOnError === 2 && store.liftedStore) async(checkForReducerErrors);
-  else if (action.action) {
-    if (startOn && !started && startOn.indexOf(action.action.type) !== -1) async(start);
-    else if (stopOn && started && stopOn.indexOf(action.action.type) !== -1) async(stop);
-    else if (sendOn && !started && sendOn.indexOf(action.action.type) !== -1) async(send);
-  }
-  return state;
-}
-
-function handleChange(state, liftedState, maxAge) {
-  if (checkForReducerErrors(liftedState)) return;
-
-  if (lastAction === 'PERFORM_ACTION') {
-    const nextActionId = liftedState.nextActionId;
-    const liftedAction = liftedState.actionsById[nextActionId - 1];
-    if (isFiltered(liftedAction.action, filters)) return;
-    relay('ACTION', state, liftedAction, nextActionId);
-    if (!isExcess && maxAge) isExcess = liftedState.stagedActionIds.length >= maxAge;
-  } else {
-    if (lastAction === 'JUMP_TO_STATE') return;
-    if (lastAction === 'PAUSE_RECORDING') {
-      paused = liftedState.isPaused;
-    } else if (lastAction === 'LOCK_CHANGES') {
-      locked = liftedState.isLocked;
+  relay(type, state, action, nextActionId) {
+    const message = {
+      type,
+      id: this.socket.id,
+      name: this.instanceName,
+      instanceId: this.appInstanceId,
+    };
+    if (state) {
+      message.payload = type === 'ERROR' ? state :
+        stringify(filterState(state, type, this.filters, this.stateSanitizer, this.actionSanitizer, nextActionId));
     }
-    if (paused || locked) {
-      if (lastAction) lastAction = undefined;
-      else return;
+    if (type === 'ACTION') {
+      message.action = stringify(
+        !this.actionSanitizer ? action : this.actionSanitizer(action.action, nextActionId - 1)
+      );
+      message.isExcess = this.isExcess;
+      message.nextActionId = nextActionId;
+    } else if (action) {
+      message.action = action;
     }
-    relay('STATE', filterStagedActions(liftedState, filters));
+    this.socket.emit(this.socket.id ? 'log' : 'log-noid', message);
   }
-}
 
-export default function devToolsEnhancer(options = {}) {
-  init({
-    ...options,
-    hostname: getHostForRN(options.hostname || 'localhost')
-  });
-  const realtime = typeof options.realtime === 'undefined'
-    ? process.env.NODE_ENV === 'development' : options.realtime;
-  if (!realtime && !(startOn || sendOn || sendOnError)) return f => f;
+  dispatchRemotely(action) {
+    try {
+      const result = evalAction(action, this.actionCreators);
+      this.store.dispatch(result);
+    } catch (e) {
+      this.relay('ERROR', e.message);
+    }
+  }
 
-  const maxAge = options.maxAge || 30;
-  return (next) => {
-    return (reducer, initialState) => {
-      store = configureStore(
-        next, monitorReducer, {
-          maxAge,
-          trace: options.trace,
-          traceLimit: options.traceLimit,
-          shouldCatchErrors: !!sendOnError,
-          shouldHotReload: options.shouldHotReload,
-          shouldRecordChanges: options.shouldRecordChanges,
-          shouldStartLocked: options.shouldStartLocked,
-          pauseActionType: options.pauseActionType || '@@PAUSED'
-        }
-      )(reducer, initialState);
-
-      if (realtime) start();
-      store.subscribe(() => {
-        if (isMonitored) handleChange(store.getState(), store.liftedStore.getState(), maxAge);
+  handleMessages = (message) => {
+    if (
+      message.type === 'IMPORT' || message.type === 'SYNC' && this.socket.id && message.id !== this.socket.id
+    ) {
+      this.store.liftedStore.dispatch({
+        type: 'IMPORT_STATE', nextLiftedState: parse(message.state)
       });
-      return store;
-    };
+    } else if (message.type === 'UPDATE') {
+      this.relay('STATE', this.getLiftedState());
+    } else if (message.type === 'START') {
+      this.isMonitored = true;
+      if (typeof this.actionCreators === 'function') this.actionCreators = this.actionCreators();
+      this.relay('STATE', this.getLiftedState(), this.actionCreators);
+    } else if (message.type === 'STOP' || message.type === 'DISCONNECTED') {
+      this.isMonitored = false;
+      this.relay('STOP');
+    } else if (message.type === 'ACTION') {
+      this.dispatchRemotely(message.action);
+    } else if (message.type === 'DISPATCH') {
+      this.store.liftedStore.dispatch(message.action);
+    }
   };
+
+  sendError = (errorAction) => {
+    // Prevent flooding
+    if (errorAction.message && errorAction.message === this.lastErrorMsg) return;
+    this.lastErrorMsg = errorAction.message;
+
+    async(() => {
+      this.store.dispatch(errorAction);
+      if (!this.started) this.send();
+    });
+  };
+
+  init(options) {
+    this.instanceName = options.name;
+    this.appInstanceId = getRandomId();
+    const { blacklist, whitelist } = options.filters || {};
+    this.filters = getLocalFilter({
+      actionsBlacklist: blacklist || options.actionsBlacklist,
+      actionsWhitelist: whitelist || options.actionsWhitelist
+    });
+    if (options.port) {
+      this.socketOptions = {
+        port: options.port,
+        hostname: options.hostname || 'localhost',
+        secure: options.secure
+      };
+    } else this.socketOptions = defaultSocketOptions;
+
+    this.suppressConnectErrors = options.suppressConnectErrors !== undefined ? options.suppressConnectErrors : true;
+
+    this.startOn = str2array(options.startOn);
+    this.stopOn = str2array(options.stopOn);
+    this.sendOn = str2array(options.sendOn);
+    this.sendOnError = options.sendOnError;
+    if (this.sendOn || this.sendOnError) {
+      this.sendTo = options.sendTo ||
+        `${this.socketOptions.secure ? 'https' : 'http'}://${this.socketOptions.hostname}:${this.socketOptions.port}`;
+      this.instanceId = options.id;
+    }
+    if (this.sendOnError === 1) catchErrors(this.sendError);
+
+    if (options.actionCreators) this.actionCreators = () => getActionsArray(options.actionCreators);
+    this.stateSanitizer = options.stateSanitizer;
+    this.actionSanitizer = options.actionSanitizer;
+  }
+
+  login() {
+    this.socket.emit('login', 'master', (err, channelName) => {
+      if (err) { console.log(err); return; }
+      this.channel = channelName;
+      this.socket.subscribe(channelName).watch(this.handleMessages);
+      this.socket.on(channelName, this.handleMessages);
+    });
+    this.started = true;
+    this.relay('START');
+  }
+
+  stop = (keepConnected) => {
+    this.started = false;
+    this.isMonitored = false;
+    if (!this.socket) return;
+    this.socket.destroyChannel(this.channel);
+    if (keepConnected) {
+      this.socket.off(this.channel, this.handleMessages);
+    } else {
+      this.socket.off();
+      this.socket.disconnect();
+    }
+  };
+
+  start = () => {
+    if (this.started || this.socket && this.socket.getState() === this.socket.CONNECTING) return;
+
+    this.socket = socketCluster.connect(this.socketOptions);
+
+    this.socket.on('error', function (err) {
+      // if we've already had this error before, increment it's counter, otherwise assign it '1' since we've had the error once.
+      this.errorCounts[err.name] = this.errorCounts.hasOwnProperty(err.name) ? this.errorCounts[err.name] + 1 : 1;
+
+      if (this.suppressConnectErrors) {
+        if (this.errorCounts[err.name] === 1) {
+          console.log('remote-redux-devtools: Socket connection errors are being suppressed. ' + '\n' +
+                'This can be disabled by setting suppressConnectErrors to \'false\'.');
+          console.log(err);
+        }
+      } else {
+        console.log(err);
+      }
+    });
+    this.socket.on('connect', () => {
+      console.log('connected to remotedev-server');
+      this.errorCounts = {}; // clear the errorCounts object, so that we'll log any new errors in the event of a disconnect
+      this.login();
+    });
+    this.socket.on('disconnect', () => {
+      this.stop(true);
+    });
+  };
+
+  checkForReducerErrors = (liftedState = this.getLiftedStateRaw()) => {
+    if (liftedState.computedStates[liftedState.currentStateIndex].error) {
+      if (this.started) this.relay('STATE', filterStagedActions(liftedState, this.filters));
+      else this.send();
+      return true;
+    }
+    return false;
+  };
+
+  monitorReducer = (state = {}, action) => {
+    this.lastAction = action.type;
+    if (!this.started && this.sendOnError === 2 && this.store.liftedStore) async(this.checkForReducerErrors);
+    else if (action.action) {
+      if (this.startOn && !this.started && this.startOn.indexOf(action.action.type) !== -1) async(this.start);
+      else if (this.stopOn && this.started && this.stopOn.indexOf(action.action.type) !== -1) async(this.stop);
+      else if (this.sendOn && !this.started && this.sendOn.indexOf(action.action.type) !== -1) async(this.send);
+    }
+    return state;
+  };
+
+  handleChange(state, liftedState, maxAge) {
+    if (this.checkForReducerErrors(liftedState)) return;
+
+    if (this.lastAction === 'PERFORM_ACTION') {
+      const nextActionId = liftedState.nextActionId;
+      const liftedAction = liftedState.actionsById[nextActionId - 1];
+      if (isFiltered(liftedAction.action, this.filters)) return;
+      this.relay('ACTION', state, liftedAction, nextActionId);
+      if (!this.isExcess && maxAge) this.isExcess = liftedState.stagedActionIds.length >= maxAge;
+    } else {
+      if (this.lastAction === 'JUMP_TO_STATE') return;
+      if (this.lastAction === 'PAUSE_RECORDING') {
+        this.paused = liftedState.isPaused;
+      } else if (this.lastAction === 'LOCK_CHANGES') {
+        this.locked = liftedState.isLocked;
+      }
+      if (this.paused || this.locked) {
+        if (this.lastAction) this.lastAction = undefined;
+        else return;
+      }
+      this.relay('STATE', filterStagedActions(liftedState, this.filters));
+    }
+  }
+
+  enhance = (options = {}) => {
+    this.init({
+      ...options,
+      hostname: getHostForRN(options.hostname || 'localhost')
+    });
+    const realtime = typeof options.realtime === 'undefined'
+      ? process.env.NODE_ENV === 'development' : options.realtime;
+    if (!realtime && !(this.startOn || this.sendOn || this.sendOnError)) return f => f;
+
+    const maxAge = options.maxAge || 30;
+    return next => {
+      return (reducer, initialState) => {
+        this.store = configureStore(
+          next, this.monitorReducer, {
+            maxAge,
+            trace: options.trace,
+            traceLimit: options.traceLimit,
+            shouldCatchErrors: !!this.sendOnError,
+            shouldHotReload: options.shouldHotReload,
+            shouldRecordChanges: options.shouldRecordChanges,
+            shouldStartLocked: options.shouldStartLocked,
+            pauseActionType: options.pauseActionType || '@@PAUSED'
+          }
+        )(reducer, initialState);
+
+        if (realtime) this.start();
+        this.store.subscribe(() => {
+          if (this.isMonitored) this.handleChange(this.store.getState(), this.getLiftedStateRaw(), maxAge);
+        });
+        return this.store;
+      };
+    };
+  }
 }
 
-export function preEnhancer(createStore) {
-  return (reducer, preloadedState, enhancer) => {
-    store = createStore(reducer, preloadedState, enhancer);
-    return {
-      ...store,
-      dispatch: (action) => (
-        locked ? action : store.dispatch(action)
-      )
+export default (...args) => new DevToolsEnhancer().enhance(...args);
+
+const compose = (options) => (...funcs) => (...args) => {
+  const devToolsEnhancer = new DevToolsEnhancer();
+
+  function preEnhancer(createStore) {
+    return (reducer, preloadedState, enhancer) => {
+      devToolsEnhancer.store = createStore(reducer, preloadedState, enhancer);
+      return {
+        ...devToolsEnhancer.store,
+        dispatch: (action) => (
+          devToolsEnhancer.locked ? action : devToolsEnhancer.store.dispatch(action)
+        )
+      };
     };
-  };
-}
+  }
 
-devToolsEnhancer.updateStore = (newStore) => {
-  console.warn('devTools.updateStore is deprecated use composeWithDevTools instead: ' +
-    'https://github.com/zalmoxisus/remote-redux-devtools#use-devtools-compose-helper');
-  store = newStore;
-};
-
-const compose = (options) => (...funcs) => (...args) =>
- [preEnhancer, ...funcs].reduceRight(
-    (composed, f) => f(composed), devToolsEnhancer(options)(...args)
+  return [preEnhancer, ...funcs].reduceRight(
+    (composed, f) => f(composed), devToolsEnhancer.enhance(options)(...args)
   );
+};
 
 export function composeWithDevTools(...funcs) {
   if (funcs.length === 0) {
-    return devToolsEnhancer();
+    return new DevToolsEnhancer().enhance();
   }
   if (funcs.length === 1 && typeof funcs[0] === 'object') {
     return compose(funcs[0]);
