@@ -124,7 +124,7 @@ Name                    | Description
 `port`                  | *Number* used to specify host's port for [`remotedev-server`](https://github.com/zalmoxisus/remotedev-server).
 `secure`                | *Boolean* specifies whether to use `https` protocol for [`remotedev-server`](https://github.com/zalmoxisus/remotedev-server).
 `maxAge`                | *Number* of maximum allowed actions to be stored on the history tree, the oldest actions are removed once maxAge is reached. Default is `30`.
-`actionsBlacklist`      | *array* of actions to be hidden in DevTools. Overwrites corresponding global setting in the options page. See the example bellow.
+`actionsBlacklist`      | *array* of actions to be hidden in DevTools. Overwrites corresponding global setting in the options page. See the example below.
 `actionsWhitelist`      | *array* of actions to be shown. All other actions will be hidden in DevTools.
 `actionSanitizer`       | *Function* which takes action object and id number as arguments, and should return action object back. See the example bellow.
 `stateSanitizer`        | *Function* which takes state object and index as arguments, and should return state object back. See the example bellow.
