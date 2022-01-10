@@ -93,7 +93,6 @@ const store = createStore(reducer, devToolsEnhancer({ realtime: true }));
 ### Monitoring
 
 Use one of our monitor apps to inspect and dispatch actions:
-* [web](http://remotedev.io/local)
 * [redux-devtools-extension](https://github.com/zalmoxisus/redux-devtools-extension) - Click "Remote" button (or press [`Cmd+Ctrl+Arrow up`](https://github.com/zalmoxisus/redux-devtools-extension#keyboard-shortcuts)) to open remote monitoring.
 * [remotedev-rn-debugger](https://github.com/jhen0409/remotedev-rn-debugger) - Used in React Native debugger as a dock monitor.
 * [atom-redux-devtools](https://github.com/zalmoxisus/atom-redux-devtools) - Used in Atom editor.
