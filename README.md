@@ -103,7 +103,7 @@ Use [remotedev-app](https://github.com/zalmoxisus/remotedev-app) to create your 
 
 ### Communicate via local server
 
-In order to make it simple to use, by default, the module and the monitor app communicate via [remotedev.io](http://remotedev.io) server. Use [remotedev-server](https://github.com/zalmoxisus/remotedev-server) cli to run it locally in order to make the connection faster and not to require an internet connection.
+Use [remotedev-server](https://github.com/zalmoxisus/remotedev-server) cli to run it locally in order to make the connection faster and not to require an internet connection.
 You can import it in your `server.js` script and start remotedev server together with your development server:
 ```js
 var remotedev = require('remotedev-server');
@@ -139,7 +139,7 @@ Name                    | Description
 `id`                    | *String* to identify the instance when sending the history triggered by `sendOn`. You can use, for example, user id here, to know who sent the data.
 `suppressConnectErrors` | *Boolean* - if set to `false`, all socket errors thrown while trying to connect will be printed to the console, regardless of if they've been thrown before. This is primarily for suppressing `SocketProtocolError` errors, which get repeatedly thrown when trying to make a connection.  Default is `true`.
 
-All parameters are optional. You have to provide at least `port` property to use `localhost` instead of `remotedev.io` server.
+All parameters are optional. You have to provide at least `port` property to use `localhost`.
 
 Example:
 ```js
