@@ -1,6 +1,8 @@
 Remote Redux DevTools
 =====================
 
+>This package was renamed to [`@redux-devtools/remote`](https://github.com/reduxjs/redux-devtools/tree/main/packages/redux-devtools-remote) and merged into [`redux-devtools` monorepo](https://github.com/reduxjs/redux-devtools). Please refer to that repository for the latest updates, issues and pull requests.
+
 ![Demo](demo.gif)
 
 Use [Redux DevTools](https://github.com/gaearon/redux-devtools) remotely for React Native, hybrid, desktop and server side Redux apps.
